@@ -1,0 +1,72 @@
+                          === Java NFCIP library ===
+                       http://nfcip-java.googlecode.com
+						 
+               François Kooman <F.Kooman@student.science.ru.nl>
+               								
+Introduction
+============
+This project is a Java library to facilitate communication over NFCIP (Peer 2 
+Peer) using ACS ACR122 NFC terminals. The library provides a reliable (i.e. 
+resumes after connection tear) byte array communication channel between these 
+NFC devices. This project provides a library for running on the Java SE 
+environment.
+
+The library was tested with:
+ * two ACS ACR122 readers (firmware ACR122U102)
+
+This library was tested on:
+ * Windows Vista SP1, Sun's JDK 6 Update 13
+ * Fedora 10 x86_64 with the included OpenJDK 
+ * Ubuntu 9.04 x86_64 with the provided OpenJDK
+ 
+Building
+========
+The easiest way to build this project is to use Ant, but also Eclipse can be 
+used. We assume that you already have Java 6 installed (OpenJDK is fine).
+
+  $ ant dist
+
+Will generate a JAR file in the "dist" directory ready for use. You can also 
+import the sources as an Eclipse project (the project files are included). 
+
+Running
+=======
+Adding the NFCIP library to the classpath is enough to use it. Included are 
+some simple tests that can be run from the command line (or from Eclipse):
+
+  $ java -cp dist/nfcip-java-1.0.jar ds.nfcip.tests.NFCIPTestMain
+  
+or specify any other path to where the nfcip-java JAR is located.
+
+See "--help" for more information on the parameters possible. One can use 
+"--list-readers" to find the attached readers, and use "--initiator" or 
+"--target" to specify the mode of operation. 
+
+Suppose one has two ACR122 readers attached to one computer, one can be set 
+to initiator and one to target and run the tests to send byte arrays between 
+one another:
+
+  $ java -cp dist/nfcip-java-1.0.jar \
+       ds.nfcip.tests.NFCIPTestMain -i -d 0 -m 100 -M 1000
+
+This will set the first device (-d 0) to initiator mode (-i) and start with 
+sending 100 bytes, then expecting the same 100 bytes back from the target 
+and then move on to 101 bytes, until 1000 is reached.
+
+For the target one would use:
+
+  $ java -cp dist/nfcip-java-1.0.jar \
+       ds.nfcip.tests.NFCIPTestMain -t -d 1 -m 100 -M 1000
+
+It is possible to enable various debugging levels to display an increasing 
+amount of details on the transfer. Without specifying anything nothing is 
+printed unless an error occurs. Use "--debug 1" to see progress information.
+Increase the value to show more details up to including the raw APDUs being
+sent to the ACR122.
+
+Issues
+======
+There is an issue that when the protocol doesn't complete (user interrupted). 
+The next time the program is started it will not be able to connect to the 
+reader without unplugging the reader first. Maybe this can be solved by a 
+Runtime.addShutdownHook in Java.
