@@ -58,14 +58,14 @@ used. We assume that you already have Java 6 installed (OpenJDK is fine).
 This will generate a MIDlet Suite in the "deployed" directory containing of a 
 preverified JAR file and the accompanying JAD file. 
 
-Running / Using
-===============
+Running
+=======
 This JAR (and optionally the JAD file) can be uploaded to the phone using for 
-example Bluetooth. For now the MIDlet logs debugging information to a memory 
-card which causes some problems.
+example Bluetooth. The MIDlet allows settings some parameters that can also 
+be set using the command line in the NFCIP Java library. In case you enable 
+debugging you need to be aware of the following:
 
-  * there needs to be a memory card
+  * there needs to be a memory card (default write location is on memory card)
   * you need to give permissions to access/write to the file system
       (this can be done by giving permission in "Application access -> Data 
        access -> Add and edit data")
-

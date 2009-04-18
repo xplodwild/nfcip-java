@@ -2,7 +2,7 @@
 <project name="nfcip-midlet" default="compile" basedir=".">
 	<description>NFCIP MIDlet</description>
 
-	<property name="version" value="1.0" />
+	<property name="version" value="1.1" />
 	<property name="midlet.vendor" value="Radboud University Nijmegen" />
 	<property name="midlet.name" value="NFCIPTestMIDlet" />
 	<property name="midlet.class" value="NFCIPTestMIDlet" />
