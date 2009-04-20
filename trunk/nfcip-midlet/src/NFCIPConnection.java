@@ -39,7 +39,7 @@ public class NFCIPConnection {
 	/**
 	 * The debug level
 	 */
-	private int debugMode;
+	private int debugLevel;
 
 	/**
 	 * temporary buffer for storing data from send() when in initiator mode
@@ -49,7 +49,7 @@ public class NFCIPConnection {
 	/**
 	 * The maximum block size to use for individual blocks
 	 */
-	private final int BLOCK_SIZE = 240;
+	private int blockSize = 240;
 
 	/**
 	 * backup for previously send data in case of connection problem where the
@@ -144,13 +144,31 @@ public class NFCIPConnection {
 	}
 
 	/**
+	 * Set block size for data transfer
+	 * 
+	 * @param bs
+	 *            the block size
+	 * @throws NFCIPException
+	 *             if invalid block size
+	 */
+	public void setBlockSize(int bs) throws NFCIPException {
+		if (blockSize >= 2 && blockSize <= 240) {
+			blockSize = bs;
+			Util.debugMessage(debugLevel, 1, "Setting Block Size to "
+					+ blockSize);
+		} else {
+			throw new NFCIPException("invalid block size");
+		}
+	}
+
+	/**
 	 * Set debug mode
 	 * 
 	 * @param b
 	 *            the debug level
 	 */
 	public void setDebugging(int b) {
-		debugMode = b;
+		debugLevel = b;
 	}
 
 	/**
@@ -164,7 +182,7 @@ public class NFCIPConnection {
 	public void send(byte[] data) throws NFCIPException {
 		if (transmissionMode != SEND)
 			throw new NFCIPException("expected receive");
-		Util.debugMessage(debugMode, 2, "We want to send: "
+		Util.debugMessage(debugLevel, 2, "We want to send: "
 				+ Util.byteArrayToString(data));
 		if (mode == INITIATOR)
 			sendInitiator(data);
@@ -175,14 +193,14 @@ public class NFCIPConnection {
 	}
 
 	private void sendInitiator(byte[] data) throws NFCIPException {
-		Vector v = Util.dataToBlockVector(data, BLOCK_SIZE);
+		Vector v = Util.dataToBlockVector(data, blockSize);
 		for (int i = 0; i < v.size(); i++) {
 			sendBlockInitiator((byte[]) v.elementAt(i));
 		}
 	}
 
 	private void sendTarget(byte[] data) throws NFCIPException {
-		Vector v = Util.dataToBlockVector(data, BLOCK_SIZE);
+		Vector v = Util.dataToBlockVector(data, blockSize);
 		for (int i = 0; i < v.size(); i++) {
 			sendBlockTarget((byte[]) v.elementAt(i));
 		}
@@ -190,7 +208,7 @@ public class NFCIPConnection {
 	}
 
 	private void sendBlock(byte[] data) {
-		Util.debugMessage(debugMode, 3, "BLOCK SEND: "
+		Util.debugMessage(debugLevel, 3, "BLOCK SEND: "
 				+ Util.byteArrayToString(data));
 		if (mode == INITIATOR)
 			sendBlockInitiator(data);
@@ -271,7 +289,7 @@ public class NFCIPConnection {
 				responses.addElement(result);
 				expectedBlockNumber = (byte) ((expectedBlockNumber + 1) % 2);
 			} else {
-				Util.debugMessage(debugMode, 2, "unexpected block received");
+				Util.debugMessage(debugLevel, 2, "unexpected block received");
 			}
 		}
 		endBlockInitiator();
@@ -299,7 +317,7 @@ public class NFCIPConnection {
 			res = receiveBlockInitiator();
 		else
 			res = receiveBlockTarget();
-		Util.debugMessage(debugMode, 3, "BLOCK RECV: "
+		Util.debugMessage(debugLevel, 3, "BLOCK RECV: "
 				+ Util.byteArrayToString(res));
 		return res;
 	}
@@ -337,17 +355,17 @@ public class NFCIPConnection {
 			 */
 			return EMPTY_BLOCK;
 		} else if (Util.isEndBlock(resultBuffer)) {
-			Util.debugMessage(debugMode, 3, "end block received");
+			Util.debugMessage(debugLevel, 3, "end block received");
 			sendBlock(END_BLOCK);
 			return receiveBlock();
 		} else if (Util.getBlockNumber(resultBuffer) == expectedBlockNumber) {
 			return resultBuffer;
 		} else if (resultBuffer != null && resultBuffer.length != 0) {
-			Util.debugMessage(debugMode, 2, "unexpected block received");
+			Util.debugMessage(debugLevel, 2, "unexpected block received");
 			sendBlock(oldData);
 			return receiveBlock();
 		} else {
-			Util.debugMessage(debugMode, 0,
+			Util.debugMessage(debugLevel, 0,
 					"we received an empty message here, impossible");
 			return null;
 		}
@@ -355,7 +373,7 @@ public class NFCIPConnection {
 
 	private void endBlockInitiator() {
 		try {
-			Util.debugMessage(debugMode, 3, "sending end block");
+			Util.debugMessage(debugLevel, 3, "sending end block");
 			// transmit(IN_DATA_EXCHANGE, END_BLOCK);
 			sendCommand(END_BLOCK);
 			receiveCommand();

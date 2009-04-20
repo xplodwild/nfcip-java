@@ -19,6 +19,11 @@ The library will be tested with:
  * Two Nokia 6131 NFCs 
  * hopefully a Nokia 6212 Classic
   
+Platform Requirements
+=====================
+See the README belonging to the NFCIP library project on how to get started
+using different platforms.
+
 Requirements
 ============
 In case you want to build the MIDlet yourself you need some libraries. It is 
@@ -37,7 +42,7 @@ possible to build the MIDlet with only free software.
 
 This is all free software. Included in the "tools" directory is a 
 "download-libs.sh" script for Unix that automatically downloads all the 
-required libraries and puts them in the correct place.
+required libraries (except Java and Ant) and puts them in the correct place.
 
 From the main source directory you can run:
 
