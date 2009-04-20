@@ -1,0 +1,14 @@
+1.1.1   (20090420)
+    - make block size configurable (add UI components)
+    - merge NFCIPConnection from NFCIP library to add support for setBlockSize
+    - update README to point to NFCIP library for platform requirements
+	- added this CHANGELOG
+	    
+1.1     (20090419)
+	- make MIDlet interactive
+	- add licensing headers
+	- include AUTHORS, COPYING file
+	- update README to reflect version 1.1
+
+1.0		(20090418)
+	- initial release

@@ -41,6 +41,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 	private List choose;
 	private TextField minDataLengthField;
 	private TextField maxDataLengthField;
+	private TextField blockSizeField;
 
 	private static final Command backCommand = new Command("Back",
 			Command.BACK, 0);
@@ -55,6 +56,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 	private int numberOfRuns = 1;
 	private int minDataLength = 200;
 	private int maxDataLength = 300;
+	private int blockSize = 240;
 
 	private int debugLevel = 0;
 
@@ -79,6 +81,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		display = Display.getDisplay(this);
 		menu = new List("NFCIP MIDlet Parameters", Choice.IMPLICIT);
 		menu.append("Set Mode", null);
+		menu.append("Set Block Size", null);
 		menu.append("Set Test Range", null);
 		menu.append("Set Debugging", null);
 		menu.append("Start", null);
@@ -101,6 +104,17 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		choose.setSelectedIndex(mode, true);
 		display.setCurrent(choose);
 		currentMenu = "setMode";
+	}
+
+	private void chooseBlockSize() {
+		blockSizeField = new TextField("Block Size:", Integer
+				.toString(blockSize), 3, TextField.DECIMAL);
+		form = new Form("Set Block Size");
+		form.append(blockSizeField);
+		form.addCommand(backCommand);
+		form.setCommandListener(this);
+		display.setCurrent(form);
+		currentMenu = "setBlockSize";
 	}
 
 	private void chooseTestRange() {
@@ -174,6 +188,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 			m = new NFCIPConnection();
 			m.setMode(NFCIPConnection.TARGET);
 			m.setDebugging(debugLevel);
+			m.setBlockSize(blockSize);
 			begin = System.currentTimeMillis();
 			float reached = 0;
 			try {
@@ -224,6 +239,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 			m = new NFCIPConnection();
 			m.setMode(NFCIPConnection.INITIATOR);
 			m.setDebugging(debugLevel);
+			m.setBlockSize(blockSize);
 			begin = System.currentTimeMillis();
 			float reached = 0;
 			try {
@@ -279,6 +295,9 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 			if (currentMenu.equals("setMode")) {
 				mode = choose.getSelectedIndex();
 			}
+			if (currentMenu.equals("setBlockSize")) {
+				blockSize = Integer.parseInt(blockSizeField.getString());
+			}
 			if (currentMenu.equals("setTestRange")) {
 				minDataLength = Integer
 						.parseInt(minDataLengthField.getString());
@@ -297,6 +316,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 				}
 			}
 			if (currentMenu.equals("setMode")
+					|| currentMenu.equals("setBlockSize")
 					|| currentMenu.equals("setTestRange")
 					|| currentMenu.equals("runningTest")
 					|| currentMenu.equals("setDebugging")) {
@@ -308,16 +328,19 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 			case 0:
 				chooseMode();
 				break;
-
 			case 1:
-				chooseTestRange();
+				chooseBlockSize();
 				break;
 
 			case 2:
-				chooseDebugging();
+				chooseTestRange();
 				break;
 
 			case 3:
+				chooseDebugging();
+				break;
+
+			case 4:
 				startConnection();
 				break;
 			}
