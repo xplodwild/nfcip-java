@@ -84,7 +84,7 @@ public class NFCIPConnection {
 	/**
 	 * The maximum block size to use for individual blocks
 	 */
-	private final int BLOCK_SIZE = 240;
+	private int blockSize = 240;
 
 	/**
 	 * backup for previously send data in case of connection problem where the
@@ -372,6 +372,24 @@ public class NFCIPConnection {
 	}
 
 	/**
+	 * Set block size for data transfer
+	 * 
+	 * @param bs
+	 *            the block size
+	 * @throws NFCIPException
+	 *             if invalid block size
+	 */
+	public void setBlockSize(int bs) throws NFCIPException {
+		if (blockSize >= 2 && blockSize <= 240) {
+			blockSize = bs;
+			Util.debugMessage(debugLevel, 1, "Setting Block Size to "
+					+ blockSize);
+		} else {
+			throw new NFCIPException("invalid block size");
+		}
+	}
+
+	/**
 	 * Set debug mode
 	 * 
 	 * @param b
@@ -403,14 +421,14 @@ public class NFCIPConnection {
 	}
 
 	private void sendInitiator(byte[] data) throws NFCIPException {
-		Vector<byte[]> v = Util.dataToBlockVector(data, BLOCK_SIZE);
+		Vector<byte[]> v = Util.dataToBlockVector(data, blockSize);
 		for (int i = 0; i < v.size(); i++) {
 			sendBlockInitiator(v.elementAt(i));
 		}
 	}
 
 	private void sendTarget(byte[] data) throws NFCIPException {
-		Vector<byte[]> v = Util.dataToBlockVector(data, BLOCK_SIZE);
+		Vector<byte[]> v = Util.dataToBlockVector(data, blockSize);
 		for (int i = 0; i < v.size(); i++) {
 			sendBlockTarget(v.elementAt(i));
 		}

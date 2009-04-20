@@ -18,6 +18,46 @@ This library was tested on:
  * Windows Vista SP1, Sun's JDK 6 Update 13
  * Fedora 10 x86_64 with the included OpenJDK 
  * Ubuntu 9.04 x86_64 with the provided OpenJDK
+
+Platform Requirements
+=====================
+Windows (Vista):
+ * Install Sun's Java 6 JRE (or JDK if you want to compile from source)
+ * Plug in the reader(s). The drivers are included with Vista
+ 
+ * Install Ant (get it from http://ant.apache.org)
+ * Set all environment variables. I use the script below to make Java and
+   Ant work like it would on Unix from the command line:
+   
+   == cut ==
+   @ECHO OFF
+   REM set JAVA_HOME=C:\Program Files\Java\jdk1.6.0_13
+   set JAVA_HOME=C:\Program Files (x86)\Java\jdk1.6.0_13
+   set ANT_HOME=%USERPROFILE%\java\apache-ant-1.7.1
+   set PATH=%PATH%;%JAVA_HOME%\bin;%ANT_HOME%\bin
+   == cut ==
+   
+   Make sure you change this for your platform! This JAVA_HOME path is for 32 
+   bit Java on 64 bit Windows.
+   
+Fedora 10:
+ * Java, PCSCD and CCID are installed by default (after using a DVD 
+   installation)
+   
+   You can install Ant using:
+   
+     # yum install ant
+
+Ubuntu 9.04:
+ * You need to manually install some components to make it work:
+   
+     "sudo apt-get install openjdk-6-jre pcscd libccid libpcsclite-dev"
+
+   If you want to compile from source you also need to install Ant:
+
+     "sudo apt-get install ant"
+     
+   This should do the trick.
  
 Building
 ========
