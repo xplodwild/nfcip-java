@@ -32,6 +32,7 @@ public class NFCIPTestMain {
 
 	private static int minDataLength = 200;
 	private static int maxDataLength = 300;
+	private static int blockSize = 240;
 
 	public static void main(String[] args) {
 		NFCIPTest t;
@@ -120,6 +121,21 @@ public class NFCIPTestMain {
 				}
 			}
 
+			if (args[i].equals("--blocksize") || args[i].equals("-b")) {
+				i++;
+				try {
+					blockSize = Integer.parseInt(args[i]);
+				} catch (NumberFormatException e) {
+					System.out
+							.println("--blocksize should be followed by a number >= 2");
+					return;
+				}
+				if (blockSize < 2 || blockSize > 240) {
+					throw new IllegalArgumentException(
+							"block size out of range, 2 <= blocksize <= 240");
+				}
+			}
+
 			if (args[i].equals("--mindatalength") || args[i].equals("-m")) {
 				i++;
 				try {
@@ -174,7 +190,7 @@ public class NFCIPTestMain {
 		try {
 			n = new NFCIPConnection();
 			n.setDebugging(debugLevel);
-
+			n.setBlockSize(blockSize);
 			n.setTerminal(terminalNumber);
 			Util.debugMessage(debugLevel, 2, "terminal number: "
 					+ terminalNumber);
@@ -219,6 +235,8 @@ public class NFCIPTestMain {
 				.println("  --verbose [-v]             Detailed information about the data transfer");
 		System.out
 				.println("  --runs i [-r i]            Number of runs of the test to perform");
+		System.out
+				.println(" --blocksize i [-b i]        Block size used for transmission");
 		System.out
 				.println("  --mindatalength i [-m i]   The minumum length of the data to use for testing\n"
 						+ "                             transmission, we test from this value to\n"

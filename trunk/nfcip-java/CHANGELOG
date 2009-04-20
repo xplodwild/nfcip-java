@@ -1,0 +1,8 @@
+1.0.1	(20090420)
+	- make blockSize configurable by providing setBlockSize method
+	- add code to make this available from command line
+	- add platform requirements to README
+	- added this CHANGELOG
+	
+1.0		(20090418)
+	- initial release
