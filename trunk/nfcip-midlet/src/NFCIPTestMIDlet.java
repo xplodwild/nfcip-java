@@ -186,13 +186,14 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		long begin, end;
 		for (int i = 0; i < numberOfRuns; i++) {
 			m = new NFCIPConnection();
-			m.setMode(NFCIPConnection.TARGET);
 			m.setDebugging(debugLevel);
+			m.setMode(NFCIPConnection.TARGET);
 			m.setBlockSize(blockSize);
 			begin = System.currentTimeMillis();
 			float reached = 0;
 			try {
 				for (int j = minDataLength; j < maxDataLength; j++) {
+					form.append(".");
 					byte[] r = m.receive();
 					Util.debugMessage(debugLevel, 1, "<-- Received "
 							+ ((r != null) ? r.length : 0) + " bytes");
@@ -237,13 +238,14 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		long begin, end;
 		for (int i = 0; i < numberOfRuns; i++) {
 			m = new NFCIPConnection();
-			m.setMode(NFCIPConnection.INITIATOR);
 			m.setDebugging(debugLevel);
+			m.setMode(NFCIPConnection.INITIATOR);
 			m.setBlockSize(blockSize);
 			begin = System.currentTimeMillis();
 			float reached = 0;
 			try {
 				for (int j = minDataLength; j < maxDataLength; j++) {
+					form.append(".");
 					byte[] data = new byte[j];
 					for (int k = 0; k < data.length; k++)
 						data[k] = (byte) (255 - k);
