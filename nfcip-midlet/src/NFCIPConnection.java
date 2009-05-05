@@ -141,6 +141,8 @@ public class NFCIPConnection {
 		default:
 			throw new NFCIPException("wrong mode specified");
 		}
+		Util.debugMessage(debugLevel, 1, "UID of peer: "
+				+ Util.byteArrayToString(c.getUID()));
 	}
 
 	/**
