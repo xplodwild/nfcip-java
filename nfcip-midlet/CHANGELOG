@@ -3,6 +3,7 @@
       make it easier to track progress when using two phones
     - append the UID (obtained with getUID()) to the log when connection is 
       established
+    - persistent settings during MIDlet life time (mode, block size, etc.)
     
 1.1.1   (20090420)
     - make block size configurable (add UI components)

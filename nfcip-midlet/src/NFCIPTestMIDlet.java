@@ -52,18 +52,44 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 	public final static int INITIATOR = 0;
 	public final static int TARGET = 1;
 
-	private int mode = TARGET;
-	private int numberOfRuns = 1;
-	private int minDataLength = 200;
-	private int maxDataLength = 300;
-	private int blockSize = 240;
+	/* Settings */
+	private int mode;
+	private int numberOfRuns;
+	private int minDataLength;
+	private int maxDataLength;
+	private int blockSize;
+	private int debugLevel;
 
-	private int debugLevel = 0;
+	/* Position of settings in RMS */
+	private final static int S_MODE = 1;
+	private final static int S_NUMBER_OF_RUNS = 2;
+	private final static int S_MIN_DATA_LENGTH = 3;
+	private final static int S_MAX_DATA_LENGTH = 4;
+	private final static int S_BLOCK_SIZE = 5;
+	private final static int S_DEBUG_LEVEL = 6;
+
+	PersistentSettings ps = null;
 
 	private static DataOutputStream dos = null;
 	private NFCIPConnection m = null;
 
 	public NFCIPTestMIDlet() {
+		ps = new PersistentSettings();
+		if (ps.getNumberOfSettings() == 0) {
+			/* first invocation of MIDlet, add default settings */
+			ps.addSetting(TARGET); /* S_MODE */
+			ps.addSetting(1); /* S_NUMBER_OF_RUNS */
+			ps.addSetting(200); /* S_MIN_DATA_LENGTH */
+			ps.addSetting(300); /* S_MAX_DATA_LENGTH */
+			ps.addSetting(240); /* S_BLOCK_SIZE */
+			ps.addSetting(0); /* S_DEBUG_LEVEL */
+		}
+		mode = ps.getSetting(S_MODE);
+		numberOfRuns = ps.getSetting(S_NUMBER_OF_RUNS);
+		minDataLength = ps.getSetting(S_MIN_DATA_LENGTH);
+		maxDataLength = ps.getSetting(S_MAX_DATA_LENGTH);
+		blockSize = ps.getSetting(S_BLOCK_SIZE);
+		debugLevel = ps.getSetting(S_DEBUG_LEVEL);
 	}
 
 	protected void destroyApp(boolean arg0) throws MIDletStateChangeException {
@@ -296,18 +322,23 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		} else if (label.equals("Back")) {
 			if (currentMenu.equals("setMode")) {
 				mode = choose.getSelectedIndex();
+				ps.updateSetting(S_MODE, mode);
 			}
 			if (currentMenu.equals("setBlockSize")) {
 				blockSize = Integer.parseInt(blockSizeField.getString());
+				ps.updateSetting(S_BLOCK_SIZE, blockSize);
 			}
 			if (currentMenu.equals("setTestRange")) {
 				minDataLength = Integer
 						.parseInt(minDataLengthField.getString());
+				ps.updateSetting(S_MIN_DATA_LENGTH, minDataLength);
 				maxDataLength = Integer
 						.parseInt(maxDataLengthField.getString());
+				ps.updateSetting(S_MAX_DATA_LENGTH, maxDataLength);
 			}
 			if (currentMenu.equals("setDebugging")) {
 				debugLevel = choose.getSelectedIndex();
+				ps.updateSetting(S_DEBUG_LEVEL, debugLevel);
 			}
 			if (currentMenu.equals("runningTest")) {
 				if (m != null) {
