@@ -18,6 +18,8 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
+package ds.nfcipme;
+
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.util.Vector;
@@ -118,12 +120,10 @@ public class Util {
 	 * @param message
 	 *            the message to print
 	 */
-	public static void debugMessage(int debugLevel, int debugThreshold,
+	public static void debugMessage(DataOutputStream os, int debugLevel, int debugThreshold,
 			String message) {
 		if (debugLevel >= debugThreshold) {
 			// System.out.println("[DEBUG] " + message);
-
-			DataOutputStream os = NFCIPTestMIDlet.getLogStream();
 			try {
 				if (os != null) {
 					os.writeUTF(message + "\n");

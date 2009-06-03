@@ -1,4 +1,6 @@
 1.1.2   (?)
+    - move all classes into a package so we can use the classes as a library
+    - add ant creation of just the library, for use in other projects 
     - print a dot to the phone screen every successful send/receive loop to
       make it easier to track progress when using two phones
     - append the UID (obtained with getUID()) to the log when connection is 

@@ -1,3 +1,5 @@
+package ds.nfcipme;
+
 /*
  * NFCIPConnection - NFCIP Java ME Library
  * 
@@ -19,6 +21,7 @@
  */
 
 import java.util.Vector;
+import java.io.DataOutputStream;
 import java.io.IOException;
 
 public class NFCIPConnection {
@@ -35,6 +38,7 @@ public class NFCIPConnection {
 	private com.nokia.nfc.p2p.NFCIPConnection c;
 	private static final String INITIATOR_URL = "nfc:rf;type=nfcip;mode=initiator";
 	private static final String TARGET_URL = "nfc:rf;type=nfcip;mode=target";
+	private DataOutputStream outputStream = null;
 
 	/**
 	 * The debug level
@@ -97,12 +101,13 @@ public class NFCIPConnection {
 	 * @throws NFCIPException
 	 *             if the operation fails
 	 */
-	private void setInitiatorMode() throws NFCIPException {
+	private void setInitiatorMode() {
 		this.transmissionMode = SEND;
 		try {
 			c = (com.nokia.nfc.p2p.NFCIPConnection) javax.microedition.io.Connector
-					.open(INITIATOR_URL);
+					.open(INITIATOR_URL, -1, true);
 		} catch (Exception e) {
+			setInitiatorMode();
 		}
 	}
 
@@ -112,12 +117,13 @@ public class NFCIPConnection {
 	 * @throws NFCIPException
 	 *             if the operation fails
 	 */
-	private void setTargetMode() throws NFCIPException {
+	private void setTargetMode() {
 		this.transmissionMode = RECEIVE;
 		try {
 			c = (com.nokia.nfc.p2p.NFCIPConnection) javax.microedition.io.Connector
-					.open(TARGET_URL);
+					.open(TARGET_URL, -1, true);
 		} catch (Exception e) {
+			setTargetMode();
 		}
 	}
 
@@ -141,7 +147,7 @@ public class NFCIPConnection {
 		default:
 			throw new NFCIPException("wrong mode specified");
 		}
-		Util.debugMessage(debugLevel, 1, "UID of peer: "
+		Util.debugMessage(outputStream, debugLevel, 1, "UID of peer: "
 				+ Util.byteArrayToString(c.getUID()));
 	}
 
@@ -156,8 +162,8 @@ public class NFCIPConnection {
 	public void setBlockSize(int bs) throws NFCIPException {
 		if (blockSize >= 2 && blockSize <= 240) {
 			blockSize = bs;
-			Util.debugMessage(debugLevel, 1, "Setting Block Size to "
-					+ blockSize);
+			Util.debugMessage(outputStream, debugLevel, 1,
+					"Setting Block Size to " + blockSize);
 		} else {
 			throw new NFCIPException("invalid block size");
 		}
@@ -169,8 +175,9 @@ public class NFCIPConnection {
 	 * @param b
 	 *            the debug level
 	 */
-	public void setDebugging(int b) {
+	public void setDebugging(DataOutputStream os, int b) {
 		debugLevel = b;
+		outputStream = os;
 	}
 
 	/**
@@ -184,7 +191,7 @@ public class NFCIPConnection {
 	public void send(byte[] data) throws NFCIPException {
 		if (transmissionMode != SEND)
 			throw new NFCIPException("expected receive");
-		Util.debugMessage(debugLevel, 2, "We want to send: "
+		Util.debugMessage(outputStream, debugLevel, 2, "We want to send: "
 				+ Util.byteArrayToString(data));
 		if (mode == INITIATOR)
 			sendInitiator(data);
@@ -194,14 +201,14 @@ public class NFCIPConnection {
 
 	}
 
-	private void sendInitiator(byte[] data) throws NFCIPException {
+	private void sendInitiator(byte[] data) {
 		Vector v = Util.dataToBlockVector(data, blockSize);
 		for (int i = 0; i < v.size(); i++) {
 			sendBlockInitiator((byte[]) v.elementAt(i));
 		}
 	}
 
-	private void sendTarget(byte[] data) throws NFCIPException {
+	private void sendTarget(byte[] data) {
 		Vector v = Util.dataToBlockVector(data, blockSize);
 		for (int i = 0; i < v.size(); i++) {
 			sendBlockTarget((byte[]) v.elementAt(i));
@@ -210,7 +217,7 @@ public class NFCIPConnection {
 	}
 
 	private void sendBlock(byte[] data) {
-		Util.debugMessage(debugLevel, 3, "BLOCK SEND: "
+		Util.debugMessage(outputStream, debugLevel, 3, "BLOCK SEND: "
 				+ Util.byteArrayToString(data));
 		if (mode == INITIATOR)
 			sendBlockInitiator(data);
@@ -278,7 +285,7 @@ public class NFCIPConnection {
 		return res;
 	}
 
-	private byte[] receiveInitiator() throws NFCIPException {
+	private byte[] receiveInitiator() {
 		Vector responses = new Vector();
 		byte[] result = receiveBlock();
 		// responses.add(result);
@@ -291,14 +298,15 @@ public class NFCIPConnection {
 				responses.addElement(result);
 				expectedBlockNumber = (byte) ((expectedBlockNumber + 1) % 2);
 			} else {
-				Util.debugMessage(debugLevel, 2, "unexpected block received");
+				Util.debugMessage(outputStream, debugLevel, 2,
+						"unexpected block received");
 			}
 		}
 		endBlockInitiator();
 		return Util.blockVectorToData(responses);
 	}
 
-	private byte[] receiveTarget() throws NFCIPException {
+	private byte[] receiveTarget() {
 		Vector responses = new Vector();
 		byte[] result = receiveBlock();
 		// responses.add(result);
@@ -319,7 +327,7 @@ public class NFCIPConnection {
 			res = receiveBlockInitiator();
 		else
 			res = receiveBlockTarget();
-		Util.debugMessage(debugLevel, 3, "BLOCK RECV: "
+		Util.debugMessage(outputStream, debugLevel, 3, "BLOCK RECV: "
 				+ Util.byteArrayToString(res));
 		return res;
 	}
@@ -357,17 +365,20 @@ public class NFCIPConnection {
 			 */
 			return EMPTY_BLOCK;
 		} else if (Util.isEndBlock(resultBuffer)) {
-			Util.debugMessage(debugLevel, 3, "end block received");
+			Util
+					.debugMessage(outputStream, debugLevel, 3,
+							"end block received");
 			sendBlock(END_BLOCK);
 			return receiveBlock();
 		} else if (Util.getBlockNumber(resultBuffer) == expectedBlockNumber) {
 			return resultBuffer;
 		} else if (resultBuffer != null && resultBuffer.length != 0) {
-			Util.debugMessage(debugLevel, 2, "unexpected block received");
+			Util.debugMessage(outputStream, debugLevel, 2,
+					"unexpected block received");
 			sendBlock(oldData);
 			return receiveBlock();
 		} else {
-			Util.debugMessage(debugLevel, 0,
+			Util.debugMessage(outputStream, debugLevel, 0,
 					"we received an empty message here, impossible");
 			return null;
 		}
@@ -375,7 +386,7 @@ public class NFCIPConnection {
 
 	private void endBlockInitiator() {
 		try {
-			Util.debugMessage(debugLevel, 3, "sending end block");
+			Util.debugMessage(outputStream, debugLevel, 3, "sending end block");
 			// transmit(IN_DATA_EXCHANGE, END_BLOCK);
 			sendCommand(END_BLOCK);
 			receiveCommand();
@@ -417,7 +428,7 @@ public class NFCIPConnection {
 		try {
 			c.send(data);
 		} catch (Exception e) {
-			throw new NFCIPException("native send error");
+			throw new NFCIPException("native send error: " + e.toString());
 		}
 	}
 
@@ -425,7 +436,7 @@ public class NFCIPConnection {
 		try {
 			return c.receive();
 		} catch (Exception e) {
-			throw new NFCIPException("native receive error");
+			throw new NFCIPException("native receive error: " + e.toString());
 		}
 	}
 }
