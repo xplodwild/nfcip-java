@@ -1,3 +1,4 @@
+package ds.nfcipme;
 /*
  * NFCIPException - Exception for NFCIPConnection
  * 

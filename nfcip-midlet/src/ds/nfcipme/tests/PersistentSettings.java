@@ -1,3 +1,4 @@
+package ds.nfcipme.tests;
 /*
  * PersistentSettings - Persistent Settings for MIDlets
  * 
