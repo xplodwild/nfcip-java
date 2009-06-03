@@ -1,4 +1,6 @@
 1.0.2	(?)
+    - strip the demo application from this project and put it in separate
+      project to make a better distinction between application and library
 	- sleep after a release of target to turn off the radio for a while
 	  which helps with reconnecting to the phone that needs a little 
 	  more time to reset target mode
