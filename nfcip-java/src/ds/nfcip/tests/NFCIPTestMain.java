@@ -232,11 +232,11 @@ public class NFCIPTestMain {
 		System.out
 				.println("  --terminal i [-d i]        Specify the terminal to use, see --list-terminals");
 		System.out
-				.println("  --verbose [-v]             Detailed information about the data transfer");
+				.println("  --debug i                  Debug level, specify a number between 0 and 5");
 		System.out
 				.println("  --runs i [-r i]            Number of runs of the test to perform");
 		System.out
-				.println(" --blocksize i [-b i]        Block size used for transmission");
+				.println("  --blocksize i [-b i]       Block size used for transmission");
 		System.out
 				.println("  --mindatalength i [-m i]   The minumum length of the data to use for testing\n"
 						+ "                             transmission, we test from this value to\n"

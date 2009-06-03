@@ -142,6 +142,16 @@ public class NFCIPConnection {
 		if (mode == INITIATOR) {
 			/* release all targets */
 			transmit(IN_RELEASE, new byte[] { 0x00 });
+			/*
+			 * sleep after a release of target to turn off the radio for a while
+			 * which helps with reconnecting to the phone that needs a little
+			 * more time to reset target mode
+			 */
+			try {
+				Thread.sleep(1000);
+			} catch (InterruptedException e) {
+				e.printStackTrace();
+			}
 		}
 	}
 

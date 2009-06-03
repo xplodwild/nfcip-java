@@ -1,3 +1,9 @@
+1.0.2	(?)
+	- sleep after a release of target to turn off the radio for a while
+	  which helps with reconnecting to the phone that needs a little 
+	  more time to reset target mode
+	- fix command line parameters for debugging
+	
 1.0.1	(20090420)
 	- make blockSize configurable by providing setBlockSize method
 	- add code to make this available from command line
