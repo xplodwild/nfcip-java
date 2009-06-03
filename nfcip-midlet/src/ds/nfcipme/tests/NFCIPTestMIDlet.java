@@ -1,5 +1,7 @@
 package ds.nfcipme.tests;
-import java.io.DataOutputStream;
+
+import java.io.OutputStream;
+import java.io.PrintStream;
 import javax.microedition.io.Connector;
 import javax.microedition.io.file.FileConnection;
 import javax.microedition.lcdui.Choice;
@@ -55,7 +57,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 
 	PersistentSettings ps = null;
 
-	private static DataOutputStream outputStream = null;
+	private static PrintStream printStream = null;
 	private NFCIPConnection m = null;
 
 	public NFCIPTestMIDlet() {
@@ -179,7 +181,8 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 					filecon.delete();
 					filecon.create();
 				}
-				outputStream = filecon.openDataOutputStream();
+				OutputStream os = filecon.openOutputStream();
+				printStream = new PrintStream(os);
 			} catch (Exception e) {
 			}
 		}
@@ -197,7 +200,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		long begin, end;
 		for (int i = 0; i < numberOfRuns; i++) {
 			m = new NFCIPConnection();
-			m.setDebugging(outputStream, debugLevel);
+			m.setDebugging(printStream, debugLevel);
 			m.setMode(NFCIPConnection.TARGET);
 			m.setBlockSize(blockSize);
 			begin = System.currentTimeMillis();
@@ -206,42 +209,44 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 				for (int j = minDataLength; j < maxDataLength; j++) {
 					form.append(".");
 					byte[] r = m.receive();
-					Util.debugMessage(outputStream, debugLevel, 1, "<-- Received "
+					Util.debugMessage(printStream, debugLevel, 1, "<-- Received "
 							+ ((r != null) ? r.length : 0) + " bytes");
 
 					byte[] data = new byte[j];
 					for (int k = 0; k < data.length; k++)
 						data[k] = (byte) (255 - k);
 					if (!Util.arrayCompare(data, r)) {
-						Util.debugMessage(outputStream, debugLevel, 1, "We wanted: ("
+						Util.debugMessage(printStream, debugLevel, 1, "We wanted: ("
 								+ data.length + ") "
 								+ Util.byteArrayToString(data));
-						Util.debugMessage(outputStream, debugLevel, 1, "We got:    ("
+						Util.debugMessage(printStream, debugLevel, 1, "We got:    ("
 								+ ((r != null) ? r.length : 0) + ") "
 								+ Util.byteArrayToString(r));
 						throw new NFCIPException(
 								"received data we don't expect to receive");
 					}
-					Util.debugMessage(outputStream, debugLevel, 1, "--> Sending  "
+					Util.debugMessage(printStream, debugLevel, 1, "--> Sending  "
 							+ data.length + " bytes");
 					m.send(r);
 					reached++;
 				}
 			} catch (NFCIPException e) {
-				Util.debugMessage(outputStream, debugLevel, 1, e.toString());
+				Util.debugMessage(printStream, debugLevel, 1, e.toString());
 				if (m != null) {
 					try {
 						m.close();
 					} catch (NFCIPException e1) {
-						Util.debugMessage(outputStream, debugLevel, 1, e1.toString());
+						Util.debugMessage(printStream, debugLevel, 1, e1.toString());
 					}
 				}
 			}
-			m.close();
+			m.close();		
 			end = System.currentTimeMillis();
-			Util.debugMessage(outputStream, debugLevel, 1, "Reached "
+			Util.debugMessage(printStream, debugLevel, 1, "Reached "
 					+ (reached / (maxDataLength - minDataLength) * 100) + "% ");
-			Util.debugMessage(outputStream, debugLevel, 1, "(took " + (end - begin) + " ms)");
+			Util.debugMessage(printStream, debugLevel, 1, "(took " + (end - begin) + " ms)");
+			printStream.close();
+			form.append("\n*DONE*");
 		}
 	}
 
@@ -249,7 +254,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		long begin, end;
 		for (int i = 0; i < numberOfRuns; i++) {
 			m = new NFCIPConnection();
-			m.setDebugging(outputStream, debugLevel);
+			m.setDebugging(printStream, debugLevel);
 			m.setMode(NFCIPConnection.INITIATOR);
 			m.setBlockSize(blockSize);
 			begin = System.currentTimeMillis();
@@ -260,18 +265,18 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 					byte[] data = new byte[j];
 					for (int k = 0; k < data.length; k++)
 						data[k] = (byte) (255 - k);
-					Util.debugMessage(outputStream, debugLevel, 1, "--> Sending  "
+					Util.debugMessage(printStream, debugLevel, 1, "--> Sending  "
 							+ data.length + " bytes");
 					m.send(data);
 					byte[] r = m.receive();
-					Util.debugMessage(outputStream, debugLevel, 1, "<-- Received "
+					Util.debugMessage(printStream, debugLevel, 1, "<-- Received "
 							+ ((r != null) ? r.length : 0) + " bytes");
 
 					if (!Util.arrayCompare(data, r)) {
-						Util.debugMessage(outputStream, debugLevel, 1, "We wanted: ("
+						Util.debugMessage(printStream, debugLevel, 1, "We wanted: ("
 								+ data.length + ") "
 								+ Util.byteArrayToString(data));
-						Util.debugMessage(outputStream, debugLevel, 1, "We got:    ("
+						Util.debugMessage(printStream, debugLevel, 1, "We got:    ("
 								+ ((r != null) ? r.length : 0) + ") "
 								+ Util.byteArrayToString(r));
 						throw new NFCIPException(
@@ -280,20 +285,22 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 					reached++;
 				}
 			} catch (NFCIPException e) {
-				Util.debugMessage(outputStream, debugLevel, 1, e.toString());
+				Util.debugMessage(printStream, debugLevel, 1, e.toString());
 				if (m != null) {
 					try {
 						m.close();
 					} catch (NFCIPException e1) {
-						Util.debugMessage(outputStream, debugLevel, 1, e1.toString());
+						Util.debugMessage(printStream, debugLevel, 1, e1.toString());
 					}
 				}
 			}
 			m.close();
 			end = System.currentTimeMillis();
-			Util.debugMessage(outputStream, debugLevel, 1, "Reached "
+			Util.debugMessage(printStream, debugLevel, 1, "Reached "
 					+ (reached / (maxDataLength - minDataLength) * 100) + "% ");
-			Util.debugMessage(outputStream, debugLevel, 1, "(took " + (end - begin) + " ms)");
+			Util.debugMessage(printStream, debugLevel, 1, "(took " + (end - begin) + " ms)");
+			printStream.close();
+			form.append("\n*DONE*");
 		}
 	}
 
