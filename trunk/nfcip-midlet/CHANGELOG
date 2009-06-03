@@ -1,4 +1,7 @@
 1.1.2   (?)
+    - print *DONE* on screen when test is done
+    - replace the DataOutputStream with a PrintStream to make the files be
+      readable by any text editor
     - move all classes into a package so we can use the classes as a library
     - add ant creation of just the library, for use in other projects 
     - print a dot to the phone screen every successful send/receive loop to

@@ -20,8 +20,7 @@
 
 package ds.nfcipme;
 
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Vector;
 
 /**
@@ -120,17 +119,12 @@ public class Util {
 	 * @param message
 	 *            the message to print
 	 */
-	public static void debugMessage(DataOutputStream os, int debugLevel, int debugThreshold,
-			String message) {
+	public static void debugMessage(PrintStream ps, int debugLevel,
+			int debugThreshold, String message) {
+		if (ps == null)
+			return;
 		if (debugLevel >= debugThreshold) {
-			// System.out.println("[DEBUG] " + message);
-			try {
-				if (os != null) {
-					os.writeUTF(message + "\n");
-					os.flush();
-				}
-			} catch (IOException e) {
-			}
+			ps.println("[DEBUG] " + message);
 		}
 	}
 
