@@ -1,4 +1,11 @@
 1.0.2	(?)
+	- print some performance metrics for every test run (-r) on the 
+	  command line. Can be used by "gnuplot"
+	- fix some more cli parameter consistency in names (reader -> 
+	  terminal etc.)
+	- keep track of the number of connection resets required
+	- update the test to make the number of runs be within the same
+	  connection, so no new connection between rounds
 	- sleep after a release of target to turn off the radio for a while
 	  which helps with reconnecting to the phone that needs a little 
 	  more time to reset target mode

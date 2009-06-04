@@ -108,6 +108,12 @@ public class NFCIPConnection {
 	protected int transmissionMode;
 
 	/**
+	 * Counts the number of connection resets required to complete the
+	 * transmission
+	 */
+	private int numberOfResets = 0;
+
+	/**
 	 * Instantiate a new NFCIPConnection object
 	 */
 	public NFCIPConnection() {
@@ -152,6 +158,7 @@ public class NFCIPConnection {
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
+			numberOfResets = 0;
 		}
 	}
 
@@ -170,7 +177,6 @@ public class NFCIPConnection {
 	 */
 	private void setInitiatorMode() throws NFCIPException {
 		this.transmissionMode = SEND;
-
 		// byte[] initiatorPayload = { 0x00, 0x00, 0x00 }; // passive, 106kbps
 		byte[] initiatorPayload = { 0x00, 0x02, 0x01, 0x00, (byte) 0xff,
 				(byte) 0xff, 0x00, 0x00 }; // passive, 424kbps
@@ -369,6 +375,7 @@ public class NFCIPConnection {
 	 */
 	public void setMode(int mode) throws NFCIPException {
 		this.mode = mode;
+		numberOfResets++;
 		switch (mode) {
 		case INITIATOR:
 			setInitiatorMode();
@@ -642,6 +649,7 @@ public class NFCIPConnection {
 	}
 
 	private void resetMode() {
+		numberOfResets++;
 		try {
 			close();
 			setMode(mode);
@@ -691,5 +699,24 @@ public class NFCIPConnection {
 		} catch (CardException e) {
 			throw new NFCIPException("problem requesting firmware version");
 		}
+	}
+
+	/**
+	 * Gets the number of resets required to complete the transmission
+	 * 
+	 * @return the number of resets
+	 */
+	public int getNumberOfResets() {
+		return numberOfResets;
+	}
+
+	/**
+	 * Reset the number of resets required to complete the transmission to zero,
+	 * this is for measuring purposes only
+	 * 
+	 * @deprecated this cannot be considered part of the API!
+	 */
+	public void resetNumberOfResets() {
+		numberOfResets = 0;
 	}
 }
