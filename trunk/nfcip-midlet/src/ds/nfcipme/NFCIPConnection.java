@@ -78,6 +78,12 @@ public class NFCIPConnection {
 	protected int transmissionMode;
 
 	/**
+	 * Counts the number of connection resets required to complete the
+	 * transmission
+	 */
+	private int numberOfResets = 0;
+
+	/**
 	 * Instantiate a new NFCIPConnection object
 	 */
 	public NFCIPConnection() {
@@ -90,6 +96,7 @@ public class NFCIPConnection {
 	 *             if the operation fails
 	 */
 	public void close() throws NFCIPException {
+		numberOfResets = 0;
 		try {
 			c.close();
 		} catch (IOException e) {
@@ -138,6 +145,7 @@ public class NFCIPConnection {
 	 */
 	public void setMode(int mode) throws NFCIPException {
 		this.mode = mode;
+		numberOfResets++;
 		switch (mode) {
 		case INITIATOR:
 			setInitiatorMode();
@@ -438,4 +446,24 @@ public class NFCIPConnection {
 			throw new NFCIPException("native receive error: " + e.toString());
 		}
 	}
+	
+	/**
+	 * Gets the number of resets required to complete the transmission
+	 * 
+	 * @return the number of resets
+	 */
+	public int getNumberOfResets() {
+		return numberOfResets;
+	}
+
+	/**
+	 * Reset the number of resets required to complete the transmission to zero,
+	 * this is for measuring purposes only
+	 * 
+	 * @deprecated this cannot be considered part of the API!
+	 */
+	public void resetNumberOfResets() {
+		numberOfResets = 0;
+	}
+	
 }

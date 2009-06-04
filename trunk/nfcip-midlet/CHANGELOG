@@ -1,4 +1,11 @@
 1.1.2   (?)
+	- replace the "form" for printing progess information with TextField
+	  which is updated once in a while, way more efficient, the form makes 
+	  the MIDlet slow down A LOT.
+	- actually expose the number of runs in the UI
+	- keep track of the number of connection resets required
+	- update the test to make the number of rounds be within the same
+	  connection, so no new connection between rounds
     - print *DONE* on screen when test is done
     - replace the DataOutputStream with a PrintStream to make the files be
       readable by any text editor
