@@ -97,12 +97,12 @@ public class NFCIPTestMain {
 					terminalNumber = Integer.parseInt(args[i]);
 				} catch (NumberFormatException e) {
 					System.out
-							.println("--reader should be followed by a terminal number");
+							.println("--terminal should be followed by a terminal number");
 					return;
 				}
 				if (terminals == null || terminalNumber < 0
 						|| terminalNumber >= terminals.size()) {
-					System.err.println("specified reader does not exist");
+					System.err.println("specified terminal does not exist");
 					return;
 				}
 			}
@@ -115,9 +115,9 @@ public class NFCIPTestMain {
 					System.out.println("--runs should be followed by a number");
 					return;
 				}
-				if (numberOfRuns <= 0 || numberOfRuns > 100) {
+				if (numberOfRuns <= 0 ) {
 					throw new IllegalArgumentException(
-							"number of runs out of range");
+							"number of runs should be positive");
 				}
 			}
 
@@ -181,7 +181,7 @@ public class NFCIPTestMain {
 				terminalNumber = 0;
 			} else if (terminalNumber == -1) {
 				System.err
-						.println("multiple readers found, specify a reader to use (see --help)");
+						.println("multiple terminals found, specify a terminal to use (see --help)");
 				return;
 			}
 		}

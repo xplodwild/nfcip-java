@@ -21,6 +21,7 @@
 package ds.nfcip.tests;
 
 import java.util.Arrays;
+import java.util.Vector;
 
 import ds.nfcip.NFCIPConnection;
 import ds.nfcip.NFCIPException;
@@ -56,10 +57,11 @@ public class NFCIPTest extends Thread {
 	 */
 	public void clientTest(int debugLevel, int numberOfRuns, int minDataLength,
 			int maxDataLength) throws NFCIPException {
+		Vector<Double> resultData = new Vector<Double>();
 		long begin, end;
 
+		n.setMode(NFCIPConnection.INITIATOR);
 		for (int i = 0; i < numberOfRuns; i++) {
-			n.setMode(NFCIPConnection.INITIATOR);
 			begin = System.nanoTime();
 			float reached = 0;
 			try {
@@ -96,12 +98,15 @@ public class NFCIPTest extends Thread {
 					}
 				}
 			}
-			n.close();
 			end = System.nanoTime();
-			Util.debugMessage(debugLevel, 1, "Reached "
-					+ (reached / (maxDataLength - minDataLength) * 100) + "% ");
-			Util.debugMessage(debugLevel, 1, "(took " + ((end - begin) / 10E5)
-					+ " ms)");
+			double timeInMs = (end - begin) / 10E5;
+			resultData.add(timeInMs);
+		}
+		n.close();
+		int i = 0;
+		System.out.println("Run\tTime(ms)");
+		for (double b : resultData) {
+			System.out.println(i++ + "\t" + b);
 		}
 	}
 
@@ -122,9 +127,10 @@ public class NFCIPTest extends Thread {
 	 */
 	public void serverTest(int debugLevel, int numberOfRuns, int minDataLength,
 			int maxDataLength) throws NFCIPException {
+		Vector<Double> resultData = new Vector<Double>();
 		long begin, end;
+		n.setMode(NFCIPConnection.TARGET);
 		for (int i = 0; i < numberOfRuns; i++) {
-			n.setMode(NFCIPConnection.TARGET);
 			begin = System.nanoTime();
 			float reached = 0;
 			try {
@@ -161,12 +167,15 @@ public class NFCIPTest extends Thread {
 					}
 				}
 			}
-			n.close();
 			end = System.nanoTime();
-			Util.debugMessage(debugLevel, 1, "Reached "
-					+ (reached / (maxDataLength - minDataLength) * 100) + "% ");
-			Util.debugMessage(debugLevel, 1, "(took " + ((end - begin) / 10E5)
-					+ " ms)");
+			double timeInMs = (end - begin) / 10E5;
+			resultData.add(timeInMs);
+		}
+		n.close();
+		int i = 0;
+		System.out.println("Run\tTime(ms)");
+		for (double b : resultData) {
+			System.out.println(i++ + "\t" + b);
 		}
 	}
 }
