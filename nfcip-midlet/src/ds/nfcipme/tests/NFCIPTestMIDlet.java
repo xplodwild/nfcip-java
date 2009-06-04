@@ -26,9 +26,11 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 
 	private List menu;
 	private List choose;
+	private TextField numberOfRunsField;
 	private TextField minDataLengthField;
 	private TextField maxDataLengthField;
 	private TextField blockSizeField;
+	private TextField statusField;
 
 	private static final Command backCommand = new Command("Back",
 			Command.BACK, 0);
@@ -94,6 +96,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		display = Display.getDisplay(this);
 		menu = new List("NFCIP MIDlet Parameters", Choice.IMPLICIT);
 		menu.append("Set Mode", null);
+		menu.append("Set Number Of Runs", null);
 		menu.append("Set Block Size", null);
 		menu.append("Set Test Range", null);
 		menu.append("Set Debugging", null);
@@ -117,6 +120,17 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		choose.setSelectedIndex(mode, true);
 		display.setCurrent(choose);
 		currentMenu = "setMode";
+	}
+
+	private void chooseNumberOfRuns() {
+		numberOfRunsField = new TextField("Number Of Runs:", Integer
+				.toString(numberOfRuns), 3, TextField.DECIMAL);
+		form = new Form("Set Number Of Runs");
+		form.append(numberOfRunsField);
+		form.addCommand(backCommand);
+		form.setCommandListener(this);
+		display.setCurrent(form);
+		currentMenu = "setNumberOfRuns";
 	}
 
 	private void chooseBlockSize() {
@@ -161,7 +175,14 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 
 	private void startConnection() {
 		form = new Form("NFCIPTest MIDlet");
-		form.append("Running...\n");
+		TextField t = new TextField("Configuration", "(numberOfRuns = "
+				+ numberOfRuns + ", minDataLength = " + minDataLength
+				+ ", maxDataLength = " + maxDataLength + ")", 75, TextField.ANY
+				| TextField.UNEDITABLE);
+		statusField = new TextField("Status", "Waiting...", 50, TextField.ANY
+				| TextField.UNEDITABLE);
+		form.append(t);
+		form.append(statusField);
 		form.addCommand(backCommand);
 		form.setCommandListener(this);
 		display.setCurrent(form);
@@ -198,35 +219,36 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 
 	private void targetMode() throws NFCIPException {
 		long begin, end;
+		m = new NFCIPConnection();
+		m.setDebugging(printStream, debugLevel);
+		m.setMode(NFCIPConnection.TARGET);
+		m.setBlockSize(blockSize);
 		for (int i = 0; i < numberOfRuns; i++) {
-			m = new NFCIPConnection();
-			m.setDebugging(printStream, debugLevel);
-			m.setMode(NFCIPConnection.TARGET);
-			m.setBlockSize(blockSize);
 			begin = System.currentTimeMillis();
 			float reached = 0;
 			try {
 				for (int j = minDataLength; j < maxDataLength; j++) {
-					form.append(".");
+					statusField.setString("(run = " + i + ", length = " + j);
 					byte[] r = m.receive();
-					Util.debugMessage(printStream, debugLevel, 1, "<-- Received "
-							+ ((r != null) ? r.length : 0) + " bytes");
+					Util.debugMessage(printStream, debugLevel, 1,
+							"<-- Received " + ((r != null) ? r.length : 0)
+									+ " bytes");
 
 					byte[] data = new byte[j];
 					for (int k = 0; k < data.length; k++)
 						data[k] = (byte) (255 - k);
 					if (!Util.arrayCompare(data, r)) {
-						Util.debugMessage(printStream, debugLevel, 1, "We wanted: ("
-								+ data.length + ") "
-								+ Util.byteArrayToString(data));
-						Util.debugMessage(printStream, debugLevel, 1, "We got:    ("
-								+ ((r != null) ? r.length : 0) + ") "
-								+ Util.byteArrayToString(r));
+						Util.debugMessage(printStream, debugLevel, 1,
+								"We wanted: (" + data.length + ") "
+										+ Util.byteArrayToString(data));
+						Util.debugMessage(printStream, debugLevel, 1,
+								"We got:    (" + ((r != null) ? r.length : 0)
+										+ ") " + Util.byteArrayToString(r));
 						throw new NFCIPException(
 								"received data we don't expect to receive");
 					}
-					Util.debugMessage(printStream, debugLevel, 1, "--> Sending  "
-							+ data.length + " bytes");
+					Util.debugMessage(printStream, debugLevel, 1,
+							"--> Sending  " + data.length + " bytes");
 					m.send(r);
 					reached++;
 				}
@@ -236,49 +258,55 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 					try {
 						m.close();
 					} catch (NFCIPException e1) {
-						Util.debugMessage(printStream, debugLevel, 1, e1.toString());
+						Util.debugMessage(printStream, debugLevel, 1, e1
+								.toString());
 					}
 				}
 			}
-			m.close();		
 			end = System.currentTimeMillis();
 			Util.debugMessage(printStream, debugLevel, 1, "Reached "
 					+ (reached / (maxDataLength - minDataLength) * 100) + "% ");
-			Util.debugMessage(printStream, debugLevel, 1, "(took " + (end - begin) + " ms)");
-			printStream.close();
-			form.append("\n*DONE*");
+			Util.debugMessage(printStream, debugLevel, 1, "(took "
+					+ (end - begin) + " ms)");
+			if (printStream != null)
+				printStream.close();
 		}
+		statusField.setString("Complete!");
+		Util.debugMessage(printStream, debugLevel, 1, m.getNumberOfResets()
+				+ " connection reset(s) required");
+		m.close();
 	}
 
 	private void initiatorMode() throws NFCIPException {
 		long begin, end;
+		m = new NFCIPConnection();
+		m.setDebugging(printStream, debugLevel);
+		m.setMode(NFCIPConnection.INITIATOR);
+		m.setBlockSize(blockSize);
 		for (int i = 0; i < numberOfRuns; i++) {
-			m = new NFCIPConnection();
-			m.setDebugging(printStream, debugLevel);
-			m.setMode(NFCIPConnection.INITIATOR);
-			m.setBlockSize(blockSize);
 			begin = System.currentTimeMillis();
 			float reached = 0;
 			try {
 				for (int j = minDataLength; j < maxDataLength; j++) {
-					form.append(".");
+					statusField.setString("(run = " + i + ", length = " + j);
 					byte[] data = new byte[j];
 					for (int k = 0; k < data.length; k++)
 						data[k] = (byte) (255 - k);
-					Util.debugMessage(printStream, debugLevel, 1, "--> Sending  "
-							+ data.length + " bytes");
+					Util.debugMessage(printStream, debugLevel, 1,
+							"--> Sending  " + data.length + " bytes");
 					m.send(data);
 					byte[] r = m.receive();
-					Util.debugMessage(printStream, debugLevel, 1, "<-- Received "
-							+ ((r != null) ? r.length : 0) + " bytes");
+					Util.debugMessage(printStream, debugLevel, 1,
+							"<-- Received " + ((r != null) ? r.length : 0)
+									+ " bytes");
 
 					if (!Util.arrayCompare(data, r)) {
-						Util.debugMessage(printStream, debugLevel, 1, "We wanted: ("
-								+ data.length + ") "
-								+ Util.byteArrayToString(data));
-						Util.debugMessage(printStream, debugLevel, 1, "We got:    ("
-								+ ((r != null) ? r.length : 0) + ") "
-								+ Util.byteArrayToString(r));
+						Util.debugMessage(printStream, debugLevel, 1,
+								"We wanted: (" + data.length + ") "
+										+ Util.byteArrayToString(data));
+						Util.debugMessage(printStream, debugLevel, 1,
+								"We got:    (" + ((r != null) ? r.length : 0)
+										+ ") " + Util.byteArrayToString(r));
 						throw new NFCIPException(
 								"received different data from what we sent");
 					}
@@ -290,18 +318,23 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 					try {
 						m.close();
 					} catch (NFCIPException e1) {
-						Util.debugMessage(printStream, debugLevel, 1, e1.toString());
+						Util.debugMessage(printStream, debugLevel, 1, e1
+								.toString());
 					}
 				}
 			}
-			m.close();
 			end = System.currentTimeMillis();
 			Util.debugMessage(printStream, debugLevel, 1, "Reached "
 					+ (reached / (maxDataLength - minDataLength) * 100) + "% ");
-			Util.debugMessage(printStream, debugLevel, 1, "(took " + (end - begin) + " ms)");
-			printStream.close();
-			form.append("\n*DONE*");
+			Util.debugMessage(printStream, debugLevel, 1, "(took "
+					+ (end - begin) + " ms)");
+			if (printStream != null)
+				printStream.close();
 		}
+		statusField.setString("Complete!");
+		Util.debugMessage(printStream, debugLevel, 1, m.getNumberOfResets()
+				+ " connection reset(s) required");
+		m.close();
 	}
 
 	public void commandAction(Command c, Displayable d) {
@@ -315,6 +348,10 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 			if (currentMenu.equals("setMode")) {
 				mode = choose.getSelectedIndex();
 				ps.updateSetting(S_MODE, mode);
+			}
+			if (currentMenu.equals("setNumberOfRuns")) {
+				numberOfRuns = Integer.parseInt(numberOfRunsField.getString());
+				ps.updateSetting(S_NUMBER_OF_RUNS, numberOfRuns);
 			}
 			if (currentMenu.equals("setBlockSize")) {
 				blockSize = Integer.parseInt(blockSizeField.getString());
@@ -342,6 +379,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 			}
 			if (currentMenu.equals("setMode")
 					|| currentMenu.equals("setBlockSize")
+					|| currentMenu.equals("setNumberOfRuns")
 					|| currentMenu.equals("setTestRange")
 					|| currentMenu.equals("runningTest")
 					|| currentMenu.equals("setDebugging")) {
@@ -354,18 +392,18 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 				chooseMode();
 				break;
 			case 1:
+				chooseNumberOfRuns();
+				break;
+			case 2:
 				chooseBlockSize();
 				break;
-
-			case 2:
+			case 3:
 				chooseTestRange();
 				break;
-
-			case 3:
+			case 4:
 				chooseDebugging();
 				break;
-
-			case 4:
+			case 5:
 				startConnection();
 				break;
 			}
