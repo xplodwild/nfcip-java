@@ -100,12 +100,12 @@ public class NFCIPConnection {
 	/**
 	 * The mode of operation of the NFCIPConnection (either INITIATOR or TARGET)
 	 */
-	protected int mode;
+	private int mode;
 
 	/**
 	 * The expected direction of the transfer (either SEND or RECEIVE)
 	 */
-	protected int transmissionMode;
+	private int transmissionMode;
 
 	/**
 	 * Counts the number of connection resets required to complete the
@@ -228,7 +228,7 @@ public class NFCIPConnection {
 	/**
 	 * Set the terminal to use
 	 * 
-	 * @param device
+	 * @param terminalNumber
 	 *            the terminal to use, specify this as a number, the first
 	 *            terminal has number 0
 	 */
@@ -702,21 +702,11 @@ public class NFCIPConnection {
 	}
 
 	/**
-	 * Gets the number of resets required to complete the transmission
+	 * Gets the number of resets required during the transmission
 	 * 
 	 * @return the number of resets
 	 */
 	public int getNumberOfResets() {
 		return numberOfResets;
-	}
-
-	/**
-	 * Reset the number of resets required to complete the transmission to zero,
-	 * this is for measuring purposes only
-	 * 
-	 * @deprecated this cannot be considered part of the API!
-	 */
-	public void resetNumberOfResets() {
-		numberOfResets = 0;
 	}
 }
