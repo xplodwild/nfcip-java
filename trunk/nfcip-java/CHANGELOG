@@ -1,4 +1,4 @@
-1.0.2	(?)
+1.0.2	(20090605)
 	- print some performance metrics for every test run (-r) on the 
 	  command line. Can be used by "gnuplot"
 	- fix some more cli parameter consistency in names (reader -> 
