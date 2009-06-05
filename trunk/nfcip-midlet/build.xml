@@ -2,7 +2,7 @@
 <project name="nfcip-midlet" default="compile" basedir=".">
 	<description>NFCIP MIDlet</description>
 
-	<property name="version" value="1.1.2" />
+	<property name="version" value="1.1.3" />
 	<property name="midlet.vendor" value="Radboud University Nijmegen" />
 	<property name="midlet.name" value="NFCIPTestMIDlet" />
 	<property name="midlet.class" value="ds.nfcipme.tests.NFCIPTestMIDlet" />
@@ -11,8 +11,9 @@
 
 	<!-- set global properties for this build -->
 	<property name="src" location="src" />
-	<property name="build" location="buildme" />
-	<property name="dist" location="distme" />
+	<property name="build" location="build" />
+	<property name="dist" location="dist" />
+	<property name="doc" location="javadoc" />
 	<property name="deployed" location="deployed" />
 	<property name="lib.dir" location="lib" />
 	<property file="${lib.dir}/lib.properties" />
@@ -94,10 +95,17 @@
 		<jad jad="${deployed}/${ant.project.name}-${version}.jad" jar="${deployed}/${ant.project.name}-${version}.jar" />
 	</target>
 
+	<!-- doc -->
+	<target name="doc">
+		<mkdir dir="${doc}" />
+		<javadoc sourcepath="${src}" excludepackagenames="ds.nfcipme.tests.*" destdir="${doc}" classpathref="all.classpath" />
+	</target>
+	
 	<!-- clean -->
 	<target name="clean" description="Clean up">
 		<delete dir="${build}" />
 		<delete dir="${dist}" />
 		<delete dir="${deployed}" />
+		<delete dir="${doc}" />
 	</target>
 </project>
