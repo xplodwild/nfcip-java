@@ -2,6 +2,13 @@
 	- add javadoc target to build file
 	- change some protected modifiers to private (for now)
 	- remove resetNumberOfResets method
+	- update version of JAD Ant Tasks to 1.1 (supports signing)
+	- create a sign task to sign the MIDlet Suite
+	- put all external libraries in lib/lib.properties to put all version
+	  configuration in this file
+	- update the library download script to accomodate the new 
+	  lib/lib.properties
+	- add sign.properties.default file to indicate what needs to be set
 	
 1.1.2   (20090605)
 	- replace the "form" for printing progess information with TextField

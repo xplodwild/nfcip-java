@@ -17,6 +17,7 @@
 	<property name="deployed" location="deployed" />
 	<property name="lib.dir" location="lib" />
 	<property file="${lib.dir}/lib.properties" />
+	<property file="sign.properties" />
 
 	<!-- these are the jars that are just needs for compilation as the 
 		 phone has implementations of those -->
@@ -40,8 +41,8 @@
 	</path>
 
 	<!-- external Ant tasks -->
-	<taskdef resource="proguard/ant/task.properties" classpath="${lib.dir}/proguard/lib/proguard.jar" />
-	<taskdef name="jad" classname="net.tuxed.ant.Jad" classpath="${lib.dir}/jad-ant-task-1.0.jar" />
+	<taskdef resource="proguard/ant/task.properties" classpath="${proguard.jar}" />
+	<taskdef resource="task.properties" classpath="${jad-ant-tasks.jar}" />
 
 	<!-- init -->
 	<target name="init" description="Initialize">
@@ -60,10 +61,11 @@
 		<mkdir dir="${dist}" />
 		<!-- create the library JAR file -->
 		<zip zipfile="${dist}/nfcip-javame-${version}.jar" basedir="${build}" excludes="ds/nfcipme/tests/**" />
-		
+
 		<!-- create the MIDlet JAR file -->
 		<jar jarfile="${dist}/${ant.project.name}-${version}.jar" basedir="${build}" includes="ds/nfcipme/tests/**">
 			<manifest>
+				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="MIDlet-Version" value="${version}" />
 				<attribute name="MIDlet-Vendor" value="${midlet.vendor}" />
 				<attribute name="MicroEdition-Configuration" value="CLDC-1.1" />
@@ -92,7 +94,12 @@
 		<!-- copy the JAR file to deploy directory -->
 		<copy file="${dist}/${ant.project.name}-${version}-preverified.jar" tofile="${deployed}/${ant.project.name}-${version}.jar" />
 		<!-- create the JAD file -->
-		<jad jad="${deployed}/${ant.project.name}-${version}.jad" jar="${deployed}/${ant.project.name}-${version}.jar" />
+		<jad jadfile="${deployed}/${ant.project.name}-${version}.jad" jarfile="${deployed}/${ant.project.name}-${version}.jar" />
+	</target>
+
+	<!-- sign -->
+	<target name="sign" depends="deploy" description="Sign the MIDlet Suite">
+		<sign keystore="${keystore}" storepass="${storepass}" certpass="${certpass}" certalias="${certalias}" jarfile="${deployed}/${ant.project.name}-${version}.jar" jadfile="${deployed}/${ant.project.name}-${version}.jad" />
 	</target>
 
 	<!-- doc -->
@@ -100,7 +107,7 @@
 		<mkdir dir="${doc}" />
 		<javadoc sourcepath="${src}" excludepackagenames="ds.nfcipme.tests.*" destdir="${doc}" classpathref="all.classpath" />
 	</target>
-	
+
 	<!-- clean -->
 	<target name="clean" description="Clean up">
 		<delete dir="${build}" />

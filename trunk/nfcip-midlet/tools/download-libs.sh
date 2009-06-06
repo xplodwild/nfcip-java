@@ -9,6 +9,12 @@ MICROEMU=2.0.3
 # ProGuard
 PROGUARD=4.3
 
+# JAD Ant Tasks (JAT)
+JAT=1.1
+
+# JSR-257 Nokia Extension API
+JSR257EXT=1.0
+
 # Bouncy Castle for Java SE
 #BOUNCY_SE=142
 
@@ -45,8 +51,10 @@ ln -s proguard${PROGUARD} proguard
 #tar -zxf lcrypto-j2me-${BOUNCY_ME}.tar.gz
 #ln -s lcrypto-j2me-${BOUNCY_ME} lcrypto-j2me
 
-# JAD Ant Task
-wget http://nfcip-java.googlecode.com/files/jad-ant-task-1.0.jar
+# JAT
+wget http://nfcip-java.googlecode.com/files/jad-ant-tasks-1.1.jar
+ln -s jad-ant-tasks-${JAT}.jar jad-ant-tasks.jar
 
 # JSR 257 Nokia Extensions Stub Libraries
-wget http://nfcip-java.googlecode.com/files/jsr-257-nokia-1.0.jar
+wget http://nfcip-java.googlecode.com/files/jsr-257-nokia-${JSR257EXT}.jar
+ln -s jsr-257-nokia-${JSR257EXT}.jar jsr-257-nokia.jar
