@@ -20,13 +20,15 @@
 
 package ds.nfcip.tests;
 
+import java.io.PrintStream;
 import java.util.List;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.TerminalFactory;
 import ds.nfcip.NFCIPConnection;
 import ds.nfcip.NFCIPException;
-import ds.nfcip.Util;
+import ds.nfcip.NFCIPTest;
+import ds.nfcip.NFCIPUtils;
 
 public class NFCIPTestMain {
 
@@ -115,7 +117,7 @@ public class NFCIPTestMain {
 					System.out.println("--runs should be followed by a number");
 					return;
 				}
-				if (numberOfRuns <= 0 ) {
+				if (numberOfRuns <= 0) {
 					throw new IllegalArgumentException(
 							"number of runs should be positive");
 				}
@@ -186,31 +188,26 @@ public class NFCIPTestMain {
 			}
 		}
 
+		PrintStream ps = new PrintStream(System.out);
 		NFCIPConnection n = null;
 		try {
 			n = new NFCIPConnection();
-			n.setDebugging(debugLevel);
+			n.setDebugging(ps, debugLevel);
 			n.setBlockSize(blockSize);
 			n.setTerminal(terminalNumber);
-			Util.debugMessage(debugLevel, 2, "terminal number: "
+			n.setMode(testMode);
+			NFCIPUtils.debugMessage(ps, debugLevel, 2, "terminal number: "
 					+ terminalNumber);
 
-			Util.debugMessage(debugLevel, 2, "mode: "
+			NFCIPUtils.debugMessage(ps, debugLevel, 2, "mode: "
 					+ ((testMode == NFCIPConnection.INITIATOR) ? "INITIATOR"
 							: "TARGET"));
-			Util.debugMessage(debugLevel, 2, "using minumum data length of "
-					+ minDataLength);
-			Util.debugMessage(debugLevel, 2, "using maximum data length of "
-					+ maxDataLength);
-			t = new NFCIPTest(n);
-
-			if (testMode == NFCIPConnection.INITIATOR) {
-				t.clientTest(debugLevel, numberOfRuns, minDataLength,
-						maxDataLength);
-			} else {
-				t.serverTest(debugLevel, numberOfRuns, minDataLength,
-						maxDataLength);
-			}
+			NFCIPUtils.debugMessage(ps, debugLevel, 2,
+					"using minumum data length of " + minDataLength);
+			NFCIPUtils.debugMessage(ps, debugLevel, 2,
+					"using maximum data length of " + maxDataLength);
+			t = new NFCIPTest(n, ps);
+			t.runTest(numberOfRuns, minDataLength, maxDataLength);
 		} catch (NFCIPException e) {
 			System.out.println(e.getMessage());
 		}
