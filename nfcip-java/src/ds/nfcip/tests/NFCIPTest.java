@@ -61,11 +61,12 @@ public class NFCIPTest extends Thread {
 		long begin, end;
 
 		n.setMode(NFCIPConnection.INITIATOR);
-		for (int i = 0; i < numberOfRuns; i++) {
-			begin = System.nanoTime();
-			float reached = 0;
-			try {
-				for (int j = minDataLength; j < maxDataLength; j++) {
+		try {
+			for (int i = 0; i < numberOfRuns; i++) {
+				begin = System.nanoTime();
+				float reached = 0;
+
+				for (int j = minDataLength; j <= maxDataLength; j++) {
 					byte[] data = new byte[j];
 					for (int k = 0; k < data.length; k++)
 						data[k] = (byte) (255 - k);
@@ -88,23 +89,41 @@ public class NFCIPTest extends Thread {
 					}
 					reached++;
 				}
-			} catch (NFCIPException e) {
-				e.printStackTrace();
-				if (n != null) {
-					try {
-						n.close();
-					} catch (NFCIPException e1) {
-						e.printStackTrace();
-					}
+				end = System.nanoTime();
+				double timeInMs = (end - begin) / 10E5;
+				resultData.add(timeInMs);
+			}
+		} catch (NFCIPException e) {
+			e.printStackTrace();
+			if (n != null) {
+				try {
+					n.close();
+				} catch (NFCIPException e1) {
+					e.printStackTrace();
 				}
 			}
-			end = System.nanoTime();
-			double timeInMs = (end - begin) / 10E5;
-			resultData.add(timeInMs);
 		}
+
+		String stats = new String("# Statistics:\n");
+		stats += "# #blocks sent         = " + n.getNumberOfSentBlocks() + "\n";
+		stats += "# #blocks received     = " + n.getNumberOfReceivedBlocks()
+				+ "\n";
+		stats += "# #raw blocks sent     = " + n.getNumberOfRawSentBlocks()
+				+ "\n";
+		stats += "# #raw blocks received = " + n.getNumberOfRawReceivedBlocks()
+				+ "\n";
+		stats += "# #bytes sent          = " + n.getNumberOfSentBytes() + "\n";
+		stats += "# #bytes received      = " + n.getNumberOfReceivedBytes()
+				+ "\n";
+		stats += "# #resets              = " + n.getNumberOfResets() + "\n";
+		float packetLoss = (float) n.getNumberOfResets()
+				/ (n.getNumberOfRawSentBlocks() + n
+						.getNumberOfRawReceivedBlocks()) * 100;
+		stats += "# packet loss          = " + packetLoss + "%\n";
+		System.out.println(stats);
 		n.close();
 		int i = 0;
-		System.out.println("Run\tTime(ms)");
+		System.out.println("# Run\tTime(ms)");
 		for (double b : resultData) {
 			System.out.println(i++ + "\t" + b);
 		}
@@ -130,14 +149,15 @@ public class NFCIPTest extends Thread {
 		Vector<Double> resultData = new Vector<Double>();
 		long begin, end;
 		n.setMode(NFCIPConnection.TARGET);
-		for (int i = 0; i < numberOfRuns; i++) {
-			begin = System.nanoTime();
-			float reached = 0;
-			try {
-				for (int j = minDataLength; j < maxDataLength; j++) {
+		try {
+			for (int i = 0; i < numberOfRuns; i++) {
+				begin = System.nanoTime();
+				float reached = 0;
+
+				for (int j = minDataLength; j <= maxDataLength; j++) {
 					byte[] r = n.receive();
-					Util.debugMessage(debugLevel, 1, "<-- Received " + r.length
-							+ " bytes");
+					Util.debugMessage(debugLevel, 1, "<-- Received "
+							+ (r != null ? r.length : 0) + " bytes");
 
 					byte[] data = new byte[j];
 					for (int k = 0; k < data.length; k++)
@@ -157,25 +177,26 @@ public class NFCIPTest extends Thread {
 					n.send(r);
 					reached++;
 				}
-			} catch (NFCIPException e) {
-				e.printStackTrace();
-				if (n != null) {
-					try {
-						n.close();
-					} catch (NFCIPException e1) {
-						e.printStackTrace();
-					}
+				end = System.nanoTime();
+				double timeInMs = (end - begin) / 10E5;
+				resultData.add(timeInMs);
+			}
+		} catch (NFCIPException e) {
+			e.printStackTrace();
+			if (n != null) {
+				try {
+					n.close();
+				} catch (NFCIPException e1) {
+					e.printStackTrace();
 				}
 			}
-			end = System.nanoTime();
-			double timeInMs = (end - begin) / 10E5;
-			resultData.add(timeInMs);
 		}
+
 		n.close();
-		int i = 0;
-		System.out.println("Run\tTime(ms)");
-		for (double b : resultData) {
-			System.out.println(i++ + "\t" + b);
-		}
+		// int i = 0;
+		// System.out.println("Run\tTime(ms)");
+		// for (double b : resultData) {
+		// System.out.println(i++ + "\t" + b);
+		// }
 	}
 }

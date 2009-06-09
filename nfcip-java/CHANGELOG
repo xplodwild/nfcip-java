@@ -2,7 +2,15 @@
 	- add javadoc target to build file
 	- change some protected modifiers to private (for now)
 	- remove resetNumberOfResets method
-	
+	- now also send/receive the upper bound (maxDataLength) bytes
+	- more pblic methods to obtain information about the data transfer
+	  like number of bytes, number of low level sends
+	- return data is always an empty array, never null
+	- fix getNumberOfResets to actually work as planned
+	- move the for loop inside the try/catch block to deal better 
+	  with errors (like not continueing noOfRuns times when there is 
+	  a failure)
+	 
 1.0.2	(20090605)
 	- print some performance metrics for every test run (-r) on the 
 	  command line. Can be used by "gnuplot"

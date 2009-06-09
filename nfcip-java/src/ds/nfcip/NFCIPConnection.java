@@ -113,6 +113,18 @@ public class NFCIPConnection {
 	 */
 	private int numberOfResets = 0;
 
+	private int noOfSentBytes = 0;
+
+	private int noOfReceivedBytes = 0;
+
+	private int noOfSentBlocks = 0;
+
+	private int noOfReceivedBlocks = 0;
+
+	private int noOfRawSentBlocks = 0;
+
+	private int noOfRawReceivedBlocks = 0;
+
 	/**
 	 * Instantiate a new NFCIPConnection object
 	 */
@@ -154,11 +166,10 @@ public class NFCIPConnection {
 			 * more time to reset target mode
 			 */
 			try {
-				Thread.sleep(1000);
+				Thread.sleep(750);
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}
-			numberOfResets = 0;
 		}
 	}
 
@@ -375,7 +386,6 @@ public class NFCIPConnection {
 	 */
 	public void setMode(int mode) throws NFCIPException {
 		this.mode = mode;
-		numberOfResets++;
 		switch (mode) {
 		case INITIATOR:
 			setInitiatorMode();
@@ -429,6 +439,8 @@ public class NFCIPConnection {
 			throw new NFCIPException("expected receive");
 		Util.debugMessage(debugLevel, 2, "We want to send: "
 				+ Util.byteArrayToString(data));
+		noOfSentBytes += data != null ? data.length : 0;
+		noOfSentBlocks++;
 		if (mode == INITIATOR)
 			sendInitiator(data);
 		else
@@ -440,14 +452,14 @@ public class NFCIPConnection {
 	private void sendInitiator(byte[] data) throws NFCIPException {
 		Vector<byte[]> v = Util.dataToBlockVector(data, blockSize);
 		for (int i = 0; i < v.size(); i++) {
-			sendBlockInitiator(v.elementAt(i));
+			sendBlock(v.elementAt(i));
 		}
 	}
 
 	private void sendTarget(byte[] data) throws NFCIPException {
 		Vector<byte[]> v = Util.dataToBlockVector(data, blockSize);
 		for (int i = 0; i < v.size(); i++) {
-			sendBlockTarget(v.elementAt(i));
+			sendBlock(v.elementAt(i));
 		}
 		endBlockTarget();
 	}
@@ -455,6 +467,7 @@ public class NFCIPConnection {
 	private void sendBlock(byte[] data) {
 		Util.debugMessage(debugLevel, 3, "BLOCK SEND: "
 				+ Util.byteArrayToString(data));
+		noOfRawSentBlocks++;
 		if (mode == INITIATOR)
 			sendBlockInitiator(data);
 		else
@@ -474,7 +487,7 @@ public class NFCIPConnection {
 			}
 		} catch (NFCIPException e) {
 			resetMode();
-			sendBlock(data);
+			sendBlockInitiator(data);
 		}
 	}
 
@@ -496,7 +509,7 @@ public class NFCIPConnection {
 			}
 		} catch (NFCIPException e) {
 			resetMode();
-			receiveBlock();
+			receiveBlockTarget();
 			sendBlockTarget(data, false);
 		}
 	}
@@ -518,6 +531,8 @@ public class NFCIPConnection {
 		else
 			res = receiveTarget();
 		transmissionMode = SEND;
+		noOfReceivedBlocks++;
+		noOfReceivedBytes += res != null ? res.length : 0;
 		return res;
 	}
 
@@ -564,6 +579,7 @@ public class NFCIPConnection {
 			res = receiveBlockTarget();
 		Util.debugMessage(debugLevel, 3, "BLOCK RECV: "
 				+ Util.byteArrayToString(res));
+		noOfRawReceivedBlocks += 1;
 		return res;
 	}
 
@@ -576,7 +592,7 @@ public class NFCIPConnection {
 				receiveBuffer = receiveCommand();
 			} catch (NFCIPException e) {
 				resetMode();
-				return receiveBlock();
+				return receiveBlockInitiator();
 			}
 		}
 		return returnBuffer;
@@ -591,7 +607,7 @@ public class NFCIPConnection {
 				throw new NFCIPException("empty block");
 		} catch (NFCIPException e) {
 			resetMode();
-			return receiveBlock();
+			return receiveBlockTarget();
 		}
 		if (Util.isEmptyBlock(resultBuffer)) {
 			/*
@@ -602,13 +618,13 @@ public class NFCIPConnection {
 		} else if (Util.isEndBlock(resultBuffer)) {
 			Util.debugMessage(debugLevel, 3, "end block received");
 			sendBlock(END_BLOCK);
-			return receiveBlock();
+			return receiveBlockTarget();
 		} else if (Util.getBlockNumber(resultBuffer) == expectedBlockNumber) {
 			return resultBuffer;
 		} else if (resultBuffer != null && resultBuffer.length != 0) {
 			Util.debugMessage(debugLevel, 2, "unexpected block received");
 			sendBlock(oldData);
-			return receiveBlock();
+			return receiveBlockTarget();
 		} else {
 			Util.debugMessage(debugLevel, 0,
 					"we received an empty message here, impossible");
@@ -709,4 +725,29 @@ public class NFCIPConnection {
 	public int getNumberOfResets() {
 		return numberOfResets;
 	}
+
+	public int getNumberOfReceivedBlocks() {
+		return noOfReceivedBlocks;
+	}
+
+	public int getNumberOfSentBlocks() {
+		return noOfSentBlocks;
+	}
+
+	public int getNumberOfRawReceivedBlocks() {
+		return noOfRawReceivedBlocks;
+	}
+
+	public int getNumberOfRawSentBlocks() {
+		return noOfRawSentBlocks;
+	}
+
+	public int getNumberOfSentBytes() {
+		return noOfSentBytes;
+	}
+
+	public int getNumberOfReceivedBytes() {
+		return noOfReceivedBytes;
+	}
+
 }

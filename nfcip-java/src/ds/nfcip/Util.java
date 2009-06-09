@@ -304,7 +304,7 @@ public class Util {
 			boolean chainingIndicator) {
 		if (bv == null || bv.size() == 0)
 			throw new IllegalArgumentException("invalid block vector");
-		byte[] data = null;
+		byte[] data = new byte[0];
 		for (int i = 0; i < bv.size(); i++) {
 			byte[] block = (byte[]) bv.elementAt(i);
 			if (chainingIndicator)

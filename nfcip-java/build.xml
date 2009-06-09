@@ -23,9 +23,12 @@
 	</target>
 
 	<!-- dist -->
-	<target name="dist" depends="compile" description="generate the distribution">
+	<target name="dist"
+	        depends="compile"
+	        description="generate the distribution">
 		<mkdir dir="${dist}" />
-		<jar jarfile="${dist}/${ant.project.name}-${version}.jar" basedir="${build}" />
+		<jar jarfile="${dist}/${ant.project.name}-${version}.jar"
+		     basedir="${build}" />
 	</target>
 
 	<!-- doc -->
@@ -33,7 +36,7 @@
 		<mkdir dir="${doc}" />
 		<javadoc sourcepath="${src}" destdir="${doc}" />
 	</target>
-		
+
 	<!-- clean -->
 	<target name="clean" description="clean up">
 		<delete dir="${build}" />
