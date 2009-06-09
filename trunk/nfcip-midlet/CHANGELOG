@@ -9,7 +9,14 @@
 	- update the library download script to accomodate the new 
 	  lib/lib.properties
 	- add sign.properties.default file to indicate what needs to be set
-	
+	- cleanup the source layout of the build.xml file
+	- make the number of resets actually work, not just stick at 1 always
+	- now also send/receive the upper bound (maxDataLength) bytes
+	- print the number of resets during the transfer on screen when test is 
+	  complete
+	- return data is always an empty array, never null
+	- some Test MIDlet UI updates
+
 1.1.2   (20090605)
 	- replace the "form" for printing progess information with TextField
 	  which is updated once in a while, way more efficient, the form makes 

@@ -223,12 +223,14 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		m.setDebugging(printStream, debugLevel);
 		m.setMode(NFCIPConnection.TARGET);
 		m.setBlockSize(blockSize);
-		for (int i = 0; i < numberOfRuns; i++) {
-			begin = System.currentTimeMillis();
-			float reached = 0;
-			try {
-				for (int j = minDataLength; j < maxDataLength; j++) {
-					statusField.setString("(run = " + i + ", length = " + j);
+		try {
+			for (int i = 0; i < numberOfRuns; i++) {
+				begin = System.currentTimeMillis();
+				float reached = 0;
+
+				for (int j = minDataLength; j <= maxDataLength; j++) {
+					statusField.setString("(run = " + i + ", length = " + j
+							+ ", #resets = " + m.getNumberOfResets());
 					byte[] r = m.receive();
 					Util.debugMessage(printStream, debugLevel, 1,
 							"<-- Received " + ((r != null) ? r.length : 0)
@@ -249,29 +251,36 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 					}
 					Util.debugMessage(printStream, debugLevel, 1,
 							"--> Sending  " + data.length + " bytes");
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+					}
 					m.send(r);
 					reached++;
 				}
-			} catch (NFCIPException e) {
-				Util.debugMessage(printStream, debugLevel, 1, e.toString());
-				if (m != null) {
-					try {
-						m.close();
-					} catch (NFCIPException e1) {
-						Util.debugMessage(printStream, debugLevel, 1, e1
-								.toString());
-					}
+				end = System.currentTimeMillis();
+				Util.debugMessage(printStream, debugLevel, 1, "Reached "
+						+ (reached / (maxDataLength - minDataLength) * 100)
+						+ "% ");
+				Util.debugMessage(printStream, debugLevel, 1, "(took "
+						+ (end - begin) + " ms)");
+				if (printStream != null)
+					printStream.close();
+			}
+		} catch (NFCIPException e) {
+			Util.debugMessage(printStream, debugLevel, 1, e.toString());
+			if (m != null) {
+				try {
+					m.close();
+				} catch (NFCIPException e1) {
+					Util
+							.debugMessage(printStream, debugLevel, 1, e1
+									.toString());
 				}
 			}
-			end = System.currentTimeMillis();
-			Util.debugMessage(printStream, debugLevel, 1, "Reached "
-					+ (reached / (maxDataLength - minDataLength) * 100) + "% ");
-			Util.debugMessage(printStream, debugLevel, 1, "(took "
-					+ (end - begin) + " ms)");
-			if (printStream != null)
-				printStream.close();
 		}
-		statusField.setString("Complete!");
+		statusField.setString("Complete! (#resets = " + m.getNumberOfResets()
+				+ ")");
 		Util.debugMessage(printStream, debugLevel, 1, m.getNumberOfResets()
 				+ " connection reset(s) required");
 		m.close();
@@ -283,18 +292,24 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		m.setDebugging(printStream, debugLevel);
 		m.setMode(NFCIPConnection.INITIATOR);
 		m.setBlockSize(blockSize);
-		for (int i = 0; i < numberOfRuns; i++) {
-			begin = System.currentTimeMillis();
-			float reached = 0;
-			try {
-				for (int j = minDataLength; j < maxDataLength; j++) {
-					statusField.setString("(run = " + i + ", length = " + j);
+		try {
+			for (int i = 0; i < numberOfRuns; i++) {
+				begin = System.currentTimeMillis();
+				float reached = 0;
+
+				for (int j = minDataLength; j <= maxDataLength; j++) {
+					statusField.setString("(run = " + i + ", length = " + j
+							+ ", #resets = " + m.getNumberOfResets());
 					byte[] data = new byte[j];
 					for (int k = 0; k < data.length; k++)
 						data[k] = (byte) (255 - k);
 					Util.debugMessage(printStream, debugLevel, 1,
 							"--> Sending  " + data.length + " bytes");
 					m.send(data);
+					try {
+						Thread.sleep(200);
+					} catch (InterruptedException e) {
+					}
 					byte[] r = m.receive();
 					Util.debugMessage(printStream, debugLevel, 1,
 							"<-- Received " + ((r != null) ? r.length : 0)
@@ -312,26 +327,29 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 					}
 					reached++;
 				}
-			} catch (NFCIPException e) {
-				Util.debugMessage(printStream, debugLevel, 1, e.toString());
-				if (m != null) {
-					try {
-						m.close();
-					} catch (NFCIPException e1) {
-						Util.debugMessage(printStream, debugLevel, 1, e1
-								.toString());
-					}
+				end = System.currentTimeMillis();
+				Util.debugMessage(printStream, debugLevel, 1, "Reached "
+						+ (reached / (maxDataLength - minDataLength) * 100)
+						+ "% ");
+				Util.debugMessage(printStream, debugLevel, 1, "(took "
+						+ (end - begin) + " ms)");
+				if (printStream != null)
+					printStream.close();
+			}
+		} catch (NFCIPException e) {
+			Util.debugMessage(printStream, debugLevel, 1, e.toString());
+			if (m != null) {
+				try {
+					m.close();
+				} catch (NFCIPException e1) {
+					Util
+							.debugMessage(printStream, debugLevel, 1, e1
+									.toString());
 				}
 			}
-			end = System.currentTimeMillis();
-			Util.debugMessage(printStream, debugLevel, 1, "Reached "
-					+ (reached / (maxDataLength - minDataLength) * 100) + "% ");
-			Util.debugMessage(printStream, debugLevel, 1, "(took "
-					+ (end - begin) + " ms)");
-			if (printStream != null)
-				printStream.close();
 		}
-		statusField.setString("Complete!");
+		statusField.setString("Complete! (#resets = " + m.getNumberOfResets()
+				+ ")");
 		Util.debugMessage(printStream, debugLevel, 1, m.getNumberOfResets()
 				+ " connection reset(s) required");
 		m.close();
