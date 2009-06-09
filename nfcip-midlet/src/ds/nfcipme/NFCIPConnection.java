@@ -96,7 +96,6 @@ public class NFCIPConnection {
 	 *             if the operation fails
 	 */
 	public void close() throws NFCIPException {
-		numberOfResets = 0;
 		try {
 			c.close();
 		} catch (IOException e) {
@@ -145,7 +144,6 @@ public class NFCIPConnection {
 	 */
 	public void setMode(int mode) throws NFCIPException {
 		this.mode = mode;
-		numberOfResets++;
 		switch (mode) {
 		case INITIATOR:
 			setInitiatorMode();
@@ -424,6 +422,7 @@ public class NFCIPConnection {
 	}
 
 	private void resetMode() {
+		numberOfResets++;
 		try {
 			close();
 			setMode(mode);
