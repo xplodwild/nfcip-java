@@ -20,14 +20,13 @@
 
 package ds.nfcip;
 
-// import java.io.DataOutputStream;
-// import java.io.IOException;
+import java.io.PrintStream;
 import java.util.Vector;
 
 /**
  * Some useful small methods used by NFCIPConnection and the test tools
  */
-public class Util {
+public class NFCIPUtils {
 	/**
 	 * Converts a byte array to readable string
 	 * 
@@ -120,19 +119,12 @@ public class Util {
 	 * @param message
 	 *            the message to print
 	 */
-	public static void debugMessage(int debugLevel, int debugThreshold,
-			String message) {
+	public static void debugMessage(PrintStream ps, int debugLevel,
+			int debugThreshold, String message) {
+		if (ps == null)
+			return;
 		if (debugLevel >= debugThreshold) {
-			System.out.println("[DEBUG] " + message);
-
-			// DataOutputStream os = NFCIPTestMIDlet.getLogStream();
-			// try {
-			// if (os != null) {
-			// os.writeUTF(message + "\n");
-			// os.flush();
-			// }
-			// } catch (IOException e) {
-			// }
+			ps.println("[DEBUG] " + message);
 		}
 	}
 
@@ -163,14 +155,14 @@ public class Util {
 	public static byte[] addPadding(byte[] data) {
 		int dataLength = (data == null) ? 0 : data.length;
 		if (dataLength >= 23) {
-			return Util.appendToByteArray(new byte[] { 0x00 }, data);
+			return NFCIPUtils.appendToByteArray(new byte[] { 0x00 }, data);
 		} else if (dataLength == 22) {
-			return Util.appendToByteArray(new byte[] { 0x02 }, data);
+			return NFCIPUtils.appendToByteArray(new byte[] { 0x02 }, data);
 		} else {
 			byte[] padding = new byte[23 - dataLength];
 			padding[0] = 0x01;
 			padding[23 - dataLength - 1] = 0x01;
-			return Util.appendToByteArray(padding, data);
+			return NFCIPUtils.appendToByteArray(padding, data);
 		}
 	}
 
@@ -184,12 +176,12 @@ public class Util {
 	public static byte[] removePadding(byte[] data) {
 		int dataLength = (data == null) ? 0 : data.length;
 		if (data[0] == 0x00 || data[0] == 0x02) {
-			return Util.subByteArray(data, 1, dataLength - 1);
+			return NFCIPUtils.subByteArray(data, 1, dataLength - 1);
 		} else {
 			int i = 1;
 			while (data[i] == 0x00)
 				i++;
-			return Util.subByteArray(data, i + 1, dataLength - i - 1);
+			return NFCIPUtils.subByteArray(data, i + 1, dataLength - i - 1);
 		}
 	}
 
@@ -214,7 +206,7 @@ public class Util {
 		}
 	}
 
-	public static Vector<byte[]> dataToBlockVector(byte[] data, int blockSize) {
+	public static Vector dataToBlockVector(byte[] data, int blockSize) {
 		return dataToBlockVector(data, blockSize, true, true);
 	}
 
@@ -235,19 +227,19 @@ public class Util {
 	 *            data after this block
 	 * @return vector of byte arrays containing the split byte array
 	 */
-	public static Vector<byte[]> dataToBlockVector(byte[] data, int blockSize,
+	public static Vector dataToBlockVector(byte[] data, int blockSize,
 			boolean chainingIndicator, boolean addBlockNumbers) {
-		Vector<byte[]> v = new Vector<byte[]>();
+		Vector v = new Vector();
 		int dataPointer = 0;
 		int dataLength = (data == null) ? 0 : data.length;
 		if (dataLength == 0 && chainingIndicator) {
-			v.add(new byte[] { 0x00 });
-			// v.addElement(new byte[] { 0x00 });
+			// v.add(new byte[] { 0x00 });
+			v.addElement(new byte[] { 0x00 });
 			return v;
 		}
 		if (dataLength == 0) {
-			v.add(new byte[0]);
-			// v.addElement(new byte[0]);
+			// v.add(new byte[0]);
+			v.addElement(new byte[0]);
 			return v;
 		}
 		if (chainingIndicator & blockSize < 2)
@@ -273,20 +265,21 @@ public class Util {
 			dataLength -= blkDataSize;
 			if (chainingIndicator)
 				blk[0] = 0x01;
-			v.add(blk);
-			// v.addElement(blk);
+			// v.add(blk);
+			v.addElement(blk);
 		}
 		if (chainingIndicator) {
-			v.lastElement()[0] = 0x00;
+			((byte[]) v.lastElement())[0] = 0x00;
 			if (addBlockNumbers) {
 				for (int i = 0; i < v.size(); i++)
-					v.elementAt(i)[0] = (byte) (v.elementAt(i)[0] | ((i % 2) << 1));
+					((byte[]) v.elementAt(i))[0] = (byte) (((byte[]) v
+							.elementAt(i))[0] | ((i % 2) << 1));
 			}
 		}
 		return v;
 	}
 
-	public static byte[] blockVectorToData(Vector<byte[]> bv) {
+	public static byte[] blockVectorToData(Vector bv) {
 		return blockVectorToData(bv, true);
 	}
 
@@ -300,16 +293,15 @@ public class Util {
 	 *            byte of the byte arrays in the Vector
 	 * @return the data
 	 */
-	public static byte[] blockVectorToData(Vector<byte[]> bv,
-			boolean chainingIndicator) {
+	public static byte[] blockVectorToData(Vector bv, boolean chainingIndicator) {
 		if (bv == null || bv.size() == 0)
 			throw new IllegalArgumentException("invalid block vector");
 		byte[] data = new byte[0];
 		for (int i = 0; i < bv.size(); i++) {
 			byte[] block = (byte[]) bv.elementAt(i);
 			if (chainingIndicator)
-				block = Util.subByteArray(block, 1, block.length - 1);
-			data = Util.appendToByteArray(data, block);
+				block = NFCIPUtils.subByteArray(block, 1, block.length - 1);
+			data = NFCIPUtils.appendToByteArray(data, block);
 		}
 		return data;
 	}

@@ -1,15 +1,28 @@
-1.0.3	(?)
+1.2.0	(?)
 	- add javadoc target to build file
-	- change some protected modifiers to private (for now)
 	- remove resetNumberOfResets method
 	- now also send/receive the upper bound (maxDataLength) bytes
-	- more pblic methods to obtain information about the data transfer
+	- more public methods to obtain information about the data transfer
 	  like number of bytes, number of low level sends
-	- return data is always an empty array, never null
+	- return data is now always an empty array, never null
 	- fix getNumberOfResets to actually work as planned
-	- move the for loop inside the try/catch block to deal better 
-	  with errors (like not continueing noOfRuns times when there is 
-	  a failure)
+	- merge initiator/target test in test class
+	- merge nfcip-java and nfcip-javame in this package:
+	  - create an interface which both java se and java me code implement
+	  - create an abstract class that both java se and java me code extend
+	    with the shared code
+	  - make the test class usable for both java se and java me
+	  - update the build file	
+	  - the MIDlet is now a complete separate project that simply links
+	    to the nfcip-javame library
+	  - add tools directory with download script
+	  - add lib directory with library configuration
+	  - redo handling of debugging to use PrintWriter now for both java me and
+	    java se
+	  - increase version number to be above both nfcip-java and nfcip-javame
+	  - *TODO* update documentation
+	  - *TODO* update JavaDoc
+	  - *TODO* move the NFCIPTest class back to ds.nfcip.tests
 	 
 1.0.2	(20090605)
 	- print some performance metrics for every test run (-r) on the 

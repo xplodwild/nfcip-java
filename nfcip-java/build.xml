@@ -1,13 +1,24 @@
 <?xml version="1.0"?>
 <project name="nfcip-java" default="compile" basedir=".">
 	<description>Java library for NFCIP communication</description>
-	<property name="version" value="1.0.3" />
+	<property name="version" value="1.2.0" />
 
 	<!-- set global properties for this build -->
 	<property name="src" location="src" />
 	<property name="build" location="build" />
+	<property name="buildme" location="buildme" />
 	<property name="dist" location="dist" />
+	<property name="lib" location="lib" />
 	<property name="doc" location="javadoc" />
+
+	<!-- this file contains the locations of the required libraries -->
+	<property file="${lib}/lib.properties" />
+
+	<path id="compile.classpath">
+		<pathelement location="${cldc.jar}" />
+		<pathelement location="${midp.jar}" />
+		<pathelement location="${jsr-257-nokia.jar}" />
+	</path>
 
 	<!-- init -->
 	<target name="init">
@@ -15,11 +26,18 @@
 		<tstamp />
 		<!-- Create the build directory structure used by compile -->
 		<mkdir dir="${build}" />
+		<mkdir dir="${buildme}" />
 	</target>
 
 	<!-- compile -->
 	<target name="compile" depends="init" description="compile the source">
-		<javac srcdir="${src}" destdir="${build}" />
+		<javac srcdir="${src}" destdir="${build}" includes="ds/nfcip/**" />
+		<javac srcdir="${src}"
+		       source="1.3"
+		       target="1.1"
+		       destdir="${buildme}"
+		       includes="ds/nfcipme/**, ds/nfcip/NFCIPTest*"
+		       classpathref="compile.classpath" />
 	</target>
 
 	<!-- dist -->
@@ -29,17 +47,24 @@
 		<mkdir dir="${dist}" />
 		<jar jarfile="${dist}/${ant.project.name}-${version}.jar"
 		     basedir="${build}" />
+		<zip zipfile="${dist}/${ant.project.name}me-${version}.jar"
+		     basedir="${buildme}" />
 	</target>
 
 	<!-- doc -->
 	<target name="doc">
 		<mkdir dir="${doc}" />
-		<javadoc sourcepath="${src}" destdir="${doc}" />
+		<javadoc sourcepath="${src}"
+		         access="public"
+		         excludepackagenames="ds.nfcipme.tests.*"
+		         destdir="${doc}"
+		         classpathref="compile.classpath" />
 	</target>
 
 	<!-- clean -->
 	<target name="clean" description="clean up">
 		<delete dir="${build}" />
+		<delete dir="${buildme}" />
 		<delete dir="${dist}" />
 		<delete dir="${doc}" />
 	</target>
