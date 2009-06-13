@@ -411,4 +411,19 @@ public class NFCIPUtils {
 
 		return true;
 	}
+
+	public static String modeToString(int mode) {
+		switch (mode) {
+		case NFCIPInterface.INITIATOR:
+			return "INITIATOR";
+		case NFCIPInterface.FAKE_INITIATOR:
+			return "FAKE_INITIATOR";
+		case NFCIPInterface.TARGET:
+			return "TARGET";
+		case NFCIPInterface.FAKE_TARGET:
+			return "FAKE_TARGET";
+		default:
+			return "UNKNOWN";
+		}
+	}
 }

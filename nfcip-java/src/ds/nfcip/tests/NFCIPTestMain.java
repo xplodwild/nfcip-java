@@ -25,8 +25,9 @@ import java.util.List;
 import javax.smartcardio.CardException;
 import javax.smartcardio.CardTerminal;
 import javax.smartcardio.TerminalFactory;
-import ds.nfcip.NFCIPConnection;
 import ds.nfcip.NFCIPException;
+import ds.nfcip.NFCIPInterface;
+import ds.nfcip.NFCIPConnection;
 import ds.nfcip.NFCIPTest;
 import ds.nfcip.NFCIPUtils;
 
@@ -62,11 +63,19 @@ public class NFCIPTestMain {
 			}
 
 			if (args[i].equals("--initiator") || args[i].equals("-i")) {
-				testMode = NFCIPConnection.INITIATOR;
+				testMode = NFCIPInterface.INITIATOR;
+			}
+
+			if (args[i].equals("--fake-initiator")) {
+				testMode = NFCIPInterface.FAKE_INITIATOR;
 			}
 
 			if (args[i].equals("--target") || args[i].equals("-t")) {
-				testMode = NFCIPConnection.TARGET;
+				testMode = NFCIPInterface.TARGET;
+			}
+
+			if (args[i].equals("--fake-target")) {
+				testMode = NFCIPInterface.FAKE_TARGET;
 			}
 
 			if (args[i].equals("--debug")) {
@@ -195,19 +204,20 @@ public class NFCIPTestMain {
 			n.setDebugging(ps, debugLevel);
 			n.setBlockSize(blockSize);
 			n.setTerminal(terminalNumber);
+			n.close();
 			n.setMode(testMode);
 			NFCIPUtils.debugMessage(ps, debugLevel, 2, "terminal number: "
 					+ terminalNumber);
 
 			NFCIPUtils.debugMessage(ps, debugLevel, 2, "mode: "
-					+ ((testMode == NFCIPConnection.INITIATOR) ? "INITIATOR"
-							: "TARGET"));
+					+ NFCIPUtils.modeToString(testMode));
 			NFCIPUtils.debugMessage(ps, debugLevel, 2,
-					"using minumum data length of " + minDataLength);
+					"using minimum data length of " + minDataLength);
 			NFCIPUtils.debugMessage(ps, debugLevel, 2,
 					"using maximum data length of " + maxDataLength);
 			t = new NFCIPTest(n, ps);
 			t.runTest(numberOfRuns, minDataLength, maxDataLength);
+			n.close();
 		} catch (NFCIPException e) {
 			System.out.println(e.getMessage());
 		}
@@ -222,6 +232,10 @@ public class NFCIPTestMain {
 		System.out.println("Mode:");
 		System.out.println("  --initiator [-i]           Set as initiator");
 		System.out.println("  --target [-t]              Set as target");
+		System.out
+				.println("  --fake-initiator           Set as \"fake\" initiator");
+		System.out
+				.println("  --fake-target              Set as \"fake\" target");
 
 		System.out.println("Options:");
 		System.out
@@ -235,7 +249,7 @@ public class NFCIPTestMain {
 		System.out
 				.println("  --blocksize i [-b i]       Block size used for transmission");
 		System.out
-				.println("  --mindatalength i [-m i]   The minumum length of the data to use for testing\n"
+				.println("  --mindatalength i [-m i]   The minimum length of the data to use for testing\n"
 						+ "                             transmission, we test from this value to\n"
 						+ "                             'maxdatalength' (default: "
 						+ minDataLength + ")");

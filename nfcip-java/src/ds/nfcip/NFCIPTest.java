@@ -44,6 +44,10 @@ public class NFCIPTest extends Thread {
 		Vector timingResults = new Vector();
 		long begin, end;
 		byte[] received;
+		NFCIPUtils.debugMessage(ps, debugLevel, 1,
+				"Starting test: numberOfRuns = " + numberOfRuns
+						+ ", minDataLength = " + minDataLength
+						+ ", maxDataLength = " + maxDataLength);
 		for (int i = 0; i < numberOfRuns; i++) {
 			begin = System.currentTimeMillis();
 			for (int j = minDataLength; j <= maxDataLength; j++) {
@@ -60,14 +64,14 @@ public class NFCIPTest extends Thread {
 				 * target will just receive data at this point, the response
 				 * will be sent only after comparison
 				 */
-				if (n.getMode() == NFCIPInterface.INITIATOR) {
+				if (n.getMode() == NFCIPInterface.INITIATOR
+						|| n.getMode() == NFCIPInterface.FAKE_INITIATOR) {
 					NFCIPUtils.debugMessage(ps, debugLevel, 1, "--> Sending  "
 							+ data.length + " bytes");
 					n.send(data);
-					received = n.receive();
-				} else {
-					received = n.receive();
 				}
+				received = n.receive();
+
 				NFCIPUtils.debugMessage(ps, debugLevel, 1, "<-- Received "
 						+ received.length + " bytes");
 
@@ -89,7 +93,8 @@ public class NFCIPTest extends Thread {
 				 * if we are in target mode we have to send back the data we
 				 * received
 				 */
-				if (n.getMode() == NFCIPInterface.TARGET) {
+				if (n.getMode() == NFCIPInterface.TARGET
+						|| n.getMode() == NFCIPInterface.FAKE_TARGET) {
 					NFCIPUtils.debugMessage(ps, debugLevel, 1, "--> Sending  "
 							+ data.length + " bytes");
 					n.send(received);

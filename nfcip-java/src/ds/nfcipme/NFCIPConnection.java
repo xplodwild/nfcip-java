@@ -45,10 +45,16 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	 *             if the operation fails
 	 */
 	public void close() throws NFCIPException {
+		NFCIPUtils.debugMessage(ps, debugLevel, 2, "Closing connection...");
 		try {
 			c.close();
 		} catch (IOException e) {
 		}
+	}
+
+	protected void releaseTargets() throws NFCIPException {
+		NFCIPUtils.debugMessage(ps, debugLevel, 2, "Releasing target...");
+		close();
 	}
 
 	/**
@@ -58,12 +64,11 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	 *             if the operation fails
 	 */
 	protected void setInitiatorMode() {
+		NFCIPUtils.debugMessage(ps, debugLevel, 2, "Setting initiator mode...");
 		this.transmissionMode = SEND;
 		try {
 			c = (com.nokia.nfc.p2p.NFCIPConnection) javax.microedition.io.Connector
 					.open(INITIATOR_URL, -1, true);
-			NFCIPUtils.debugMessage(ps, debugLevel, 1, "UID of peer: "
-					+ NFCIPUtils.byteArrayToString(c.getUID()));
 		} catch (Exception e) {
 			setInitiatorMode();
 		}
@@ -76,18 +81,20 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	 *             if the operation fails
 	 */
 	protected void setTargetMode() {
+		NFCIPUtils.debugMessage(ps, debugLevel, 2, "Setting target mode...");
 		this.transmissionMode = RECEIVE;
 		try {
 			c = (com.nokia.nfc.p2p.NFCIPConnection) javax.microedition.io.Connector
 					.open(TARGET_URL, -1, true);
-			NFCIPUtils.debugMessage(ps, debugLevel, 1, "UID of peer: "
-					+ NFCIPUtils.byteArrayToString(c.getUID()));
 		} catch (Exception e) {
 			setTargetMode();
 		}
 	}
 
 	protected void sendCommand(byte[] data) throws NFCIPException {
+		NFCIPUtils.debugMessage(ps, debugLevel, 4, "Sent     ("
+				+ (data != null ? data.length : 0) + " bytes): "
+				+ NFCIPUtils.byteArrayToString(data));
 		try {
 			c.send(data);
 		} catch (Exception e) {
@@ -97,7 +104,11 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 
 	protected byte[] receiveCommand() throws NFCIPException {
 		try {
-			return c.receive();
+			byte[] recv = c.receive();
+			NFCIPUtils.debugMessage(ps, debugLevel, 4, "Received ("
+					+ (recv != null ? recv.length : 0) + " bytes): "
+					+ NFCIPUtils.byteArrayToString(recv));
+			return recv;
 		} catch (Exception e) {
 			throw new NFCIPException("native receive error: " + e.toString());
 		}
