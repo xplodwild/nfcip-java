@@ -56,9 +56,10 @@
 		<mkdir dir="${doc}" />
 		<javadoc sourcepath="${src}"
 		         access="public"
-		         excludepackagenames="ds.nfcipme.tests.*"
+		         excludepackagenames="ds.nfcip.tests.*, ds.nfcipme.tests.*"
 		         destdir="${doc}"
-		         classpathref="compile.classpath" />
+		         classpathref="compile.classpath"
+		         failonerror="true" />
 	</target>
 
 	<!-- clean -->

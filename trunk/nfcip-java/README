@@ -6,17 +6,18 @@
 Introduction
 ============
 This project is a Java library to facilitate communication over NFCIP (Peer 2 
-Peer) using ACS ACR122 NFC terminals. The library provides a reliable (i.e. 
-resumes after connection tear) byte array communication channel between these 
-NFC devices. This project provides a library for running on the Java SE 
-environment.
+Peer) using ACS ACR122 NFC terminals and/or Nokia NFC capable phones. The 
+library provides a reliable (i.e. resumes after connection tear) byte array 
+communication channel between these NFC devices. This project provides a 
+library for running in the Java SE and Java ME environment.
 
 The library was tested with:
  * two ACS ACR122 readers (firmware ACR122U102)
+ * a Nokia 6131 NFC phone
 
 This library was tested on:
  * Windows Vista SP1, Sun's JDK 6 Update 13
- * Fedora 10 x86_64 with the included OpenJDK 
+ * Fedora 11 x86_64 with the provided OpenJDK 
  * Ubuntu 9.04 x86_64 with the provided OpenJDK
 
 Platform Requirements
@@ -40,13 +41,13 @@ Windows (Vista):
    Make sure you change this for your platform! This JAVA_HOME path is for 32 
    bit Java on 64 bit Windows.
    
-Fedora 10:
- * Java, PCSCD and CCID are installed by default (after using a DVD 
-   installation)
+Fedora 11:
+ * Java is installed by default on Fedora, but in case it is not installed
+   you can install everything required like this:
    
-   You can install Ant using:
+   You can install the missing components using:
    
-     # yum install ant
+     # yum install ant java-1.6.0-openjdk-devel pcsc-lite-devel
 
 Ubuntu 9.04:
  * You need to manually install some components to make it work:
@@ -58,19 +59,88 @@ Ubuntu 9.04:
      "sudo apt-get install ant"
      
    This should do the trick.
+   
+In addition, to build the Java ME library (which is done by default) one 
+should install the CLDC/MIDP/JSR-257 libraries as well. They are provided
+by:
  
+ * MicroEmulator (http://www.microemu.org/)
+	Tested with version 2.0.3
+ * JSR 257 Nokia Extension Stub Library (http://nfcip-java.googlecode.com)
+ 	Tested with version 1.0	
+ 	
+The script in the tools directory (download-libs.sh) takes care of 
+downloading and extracting them in the correct location (in the "lib" 
+directory) In order to download and extract the files run:
+
+	$ sh tools/download-libs.sh
+
+Now you should be able to build everything.
+
 Building
 ========
-The easiest way to build this project is to use Ant, but also Eclipse can be 
-used. We assume that you already have Java 6 installed (OpenJDK is fine).
+The easiest way to build this project is to use Ant. We assume that you 
+followed the instructions above.
 
   $ ant dist
 
-Will generate a JAR file in the "dist" directory ready for use. You can also 
-import the sources as an Eclipse project (the project files are included). 
+Will generate the JAR files in the "dist" directory ready for use. There 
+will be two libraries:
 
-Running
-=======
+	- nfcip-java-VERSION.jar
+	- nfcip-javame-VERSION.jar
+	
+The first one is for the Java SE environment, the second on is for use on
+the phone. See the API documentation on how to use them. 
+
+API documentation
+=================
+To generate the API documentation, run:
+	
+	$ ant doc
+
+In case one wants to initialize as initiator and send/receive some data
+to/from a target one would use:
+
+	NFCIPConnection n = new NFCIPConnection();
+	n.setTerminal(0);
+	n.setMode(NFCIPConnection.INITIATOR);
+	byte[] message = new String("Hello World!").getBytes();
+	n.send(message);
+	byte[] response = n.receive();
+	System.out.println(new String(response));
+	n.close();
+
+The initiator always starts sending data, the target always starts receiving 
+data:
+
+	NFCIPConnection n = new NFCIPConnection();
+	n.setTerminal(1);
+	n.setMode(NFCIPConnection.TARGET);
+	byte[] message = n.receive();
+	System.out.println(new String(message));
+	byte[] response = new String("Hello to you as well!").getBytes();
+	n.send(response);
+	n.close();
+
+The API for Java SE and Java ME platforms are identical.
+
+Alternative Modes of operation (FAKE_INITIATOR and FAKE_TARGET)
+===============================================================
+Next to "INITIATOR" and "TARGET" mode there are also "FAKE_INITIATOR" and
+"FAKE_TARGET". These modes are used for communicating with the Nokia 6131 
+NFC. The "TARGET" mode on the Nokia 6131 NFC is very unreliable so what we
+did was in order to communicate between as host running Java SE and the 
+phone is put the host in "FAKE_INITIATOR" mode which is really target mode
+and the phone in "FAKE_TARGET" mode which is really initiator mode. 
+
+Now the "FAKE_INITIATOR" still seems the party to "initiate" the contact 
+(i.e.: send the first message) while in reality there is a "dummy" message
+going from the FAKE_TARGET to the FAKE_INITIATOR. These extra modes make
+the switch transparent for the application.
+ 
+Reliability Testing
+===================
 Adding the NFCIP library to the classpath is enough to use it. Included are 
 some simple tests that can be run from the command line (or from Eclipse):
 

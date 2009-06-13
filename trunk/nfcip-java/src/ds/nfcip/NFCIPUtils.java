@@ -24,7 +24,7 @@ import java.io.PrintStream;
 import java.util.Vector;
 
 /**
- * Some useful small methods used by NFCIPConnection and the test tools
+ * Some small abstract methods used by NFCIPConnection and the tests
  */
 public class NFCIPUtils {
 	/**
@@ -279,6 +279,14 @@ public class NFCIPUtils {
 		return v;
 	}
 
+	/**
+	 * Converts a Vector of byte arrays back to a byte array of data in case the
+	 * chaining byte is present
+	 * 
+	 * @param bv
+	 *            the Vector
+	 * @return the data
+	 */
 	public static byte[] blockVectorToData(Vector bv) {
 		return blockVectorToData(bv, true);
 	}
