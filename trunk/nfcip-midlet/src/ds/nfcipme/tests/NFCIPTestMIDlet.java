@@ -13,11 +13,11 @@ import javax.microedition.lcdui.List;
 import javax.microedition.lcdui.TextField;
 import javax.microedition.midlet.MIDlet;
 import javax.microedition.midlet.MIDletStateChangeException;
-import ds.nfcipme.NFCIPConnection;
 import ds.nfcip.NFCIPException;
 import ds.nfcip.NFCIPInterface;
 import ds.nfcip.NFCIPTest;
 import ds.nfcip.NFCIPUtils;
+import ds.nfcipme.NFCIPConnection;
 
 public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 		CommandListener {
@@ -213,7 +213,7 @@ public class NFCIPTestMIDlet extends MIDlet implements Runnable,
 			m.setBlockSize(blockSize);
 			m.setMode(mode);
 			statusField.setString("Running...");
-			NFCIPTest t = new NFCIPTest(m, printStream);
+			NFCIPTest t = new NFCIPTest(m, printStream, debugLevel);
 			t.runTest(numberOfRuns, minDataLength, maxDataLength);
 			statusField.setString("Finished! (#resets = "
 					+ m.getNumberOfResets() + ")");
