@@ -4,8 +4,31 @@ import java.io.PrintStream;
 
 public interface NFCIPInterface {
 
+	/**
+	 * Initiator mode
+	 */
 	public final static int INITIATOR = 0;
+
+	/**
+	 * Target mode
+	 */
 	public final static int TARGET = 1;
+
+	/**
+	 * Fake initiator mode.
+	 * 
+	 * This is actually target mode, but acts like an initiator in that it first
+	 * wants to send and then receive data.
+	 */
+	public final static int FAKE_INITIATOR = 2;
+
+	/**
+	 * Fake target mode
+	 * 
+	 * This is actually initiator mode, but acts like a target in that it first
+	 * wants to receive and then send data.
+	 */
+	public final static int FAKE_TARGET = 3;
 
 	/**
 	 * Set the mode of operation (either INITIATOR or TARGET)

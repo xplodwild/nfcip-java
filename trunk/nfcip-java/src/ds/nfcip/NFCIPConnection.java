@@ -80,13 +80,18 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	}
 
 	/**
-	 * Close current connection (release target when in INITIATOR mode)
+	 * Close current connection
 	 * 
 	 * @throws NFCIPException
 	 *             if the operation fails
 	 */
 	public void close() throws NFCIPException {
-		if (mode == INITIATOR) {
+		if (mode == FAKE_INITIATOR)
+			sendCommand(new byte[] { (byte) 0x89 });
+	}
+
+	protected void releaseTargets() throws NFCIPException {
+		if (mode == INITIATOR || mode == FAKE_TARGET) {
 			/* release all targets */
 			transmit(IN_RELEASE, new byte[] { 0x00 });
 			/*
@@ -283,7 +288,7 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	}
 
 	protected void sendCommand(byte[] data) throws NFCIPException {
-		if (mode == INITIATOR) {
+		if (mode == INITIATOR || mode == FAKE_TARGET) {
 			tmpSendStorage = transmit(IN_DATA_EXCHANGE, data);
 		} else {
 			transmit(TG_SET_DATA, data);
@@ -291,7 +296,7 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	}
 
 	protected byte[] receiveCommand() throws NFCIPException {
-		if (mode == INITIATOR) {
+		if (mode == INITIATOR || mode == FAKE_TARGET) {
 			return tmpSendStorage;
 		} else {
 			return transmit(TG_GET_DATA, null);

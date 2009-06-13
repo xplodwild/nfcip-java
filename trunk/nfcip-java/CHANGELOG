@@ -17,13 +17,17 @@
 	    to the nfcip-javame library
 	  - add tools directory with download script
 	  - add lib directory with library configuration
-	  - redo handling of debugging to use PrintWriter now for both java me and
-	    java se
+	  - redo handling of debugging to use PrintWriter now for both Java ME and
+	    Java SE
 	  - increase version number to be above both nfcip-java and nfcip-javame
 	  - *TODO* update documentation
 	  - *TODO* update JavaDoc
-	  - *TODO* move the NFCIPTest class back to ds.nfcip.tests
-	 
+	- first attempt to create a "fake" target and initiator mode, the phone's 
+	  target mode is very flaky so this will actually make the phone initiator 
+	  while it behaves as a target (receive data first, then send)
+	- cleanup debug printing
+	- create a util method to print the mode of operation
+	  
 1.0.2	(20090605)
 	- print some performance metrics for every test run (-r) on the 
 	  command line. Can be used by "gnuplot"

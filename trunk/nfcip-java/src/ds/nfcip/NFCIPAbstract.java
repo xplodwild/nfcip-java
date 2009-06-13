@@ -88,12 +88,26 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	 */
 	public void setMode(int mode) throws NFCIPException {
 		this.mode = mode;
+		NFCIPUtils.debugMessage(ps, debugLevel, 1, "Setting mode: "
+				+ NFCIPUtils.modeToString(mode));
 		switch (mode) {
 		case INITIATOR:
 			setInitiatorMode();
 			break;
 		case TARGET:
 			setTargetMode();
+			break;
+		case FAKE_INITIATOR:
+			setTargetMode();
+			byte[] recv = receiveCommand();
+			if (recv == null || recv[0] != (byte) 0x88)
+				throw new NFCIPException("problem with fake initiator");
+			transmissionMode = SEND;
+			break;
+		case FAKE_TARGET:
+			setInitiatorMode();
+			sendCommand(new byte[] { (byte) 0x88 });
+			transmissionMode = RECEIVE;
 			break;
 		default:
 			throw new NFCIPException("wrong mode specified");
@@ -139,11 +153,9 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	public void send(byte[] data) throws NFCIPException {
 		if (transmissionMode != SEND)
 			throw new NFCIPException("expected receive");
-		NFCIPUtils.debugMessage(ps, debugLevel, 2, "We want to send: "
-				+ NFCIPUtils.byteArrayToString(data));
 		noOfSentBytes += data != null ? data.length : 0;
 		noOfSentBlocks++;
-		if (mode == INITIATOR)
+		if (mode == INITIATOR || mode == FAKE_INITIATOR)
 			sendInitiator(data);
 		else
 			sendTarget(data);
@@ -167,10 +179,8 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	}
 
 	private void sendBlock(byte[] data) {
-		NFCIPUtils.debugMessage(ps, debugLevel, 3, "BLOCK SEND: "
-				+ NFCIPUtils.byteArrayToString(data));
 		noOfRawSentBlocks++;
-		if (mode == INITIATOR)
+		if (mode == INITIATOR || mode == FAKE_INITIATOR)
 			sendBlockInitiator(data);
 		else
 			sendBlockTarget(data);
@@ -179,15 +189,14 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	private void sendBlockInitiator(byte[] data) {
 		try {
 			if (NFCIPUtils.isChained(data)) {
-				// transmit(IN_DATA_EXCHANGE, data);
 				sendCommand(data);
 				receiveCommand();
 			} else {
-				// receiveBuffer = transmit(IN_DATA_EXCHANGE, data);
 				sendCommand(data);
 				receiveBuffer = receiveCommand();
 			}
 		} catch (NFCIPException e) {
+			NFCIPUtils.debugMessage(ps, debugLevel, 1, e.getMessage());
 			resetMode();
 			sendBlockInitiator(data);
 		}
@@ -201,15 +210,14 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		if (backupData)
 			oldData = data;
 		try {
-			// transmit(TG_SET_DATA, data);
 			sendCommand(data);
 			if (NFCIPUtils.isChained(data)) {
-				// byte[] checkForNullBlock = transmit(TG_GET_DATA, null);
 				byte[] checkForNullBlock = receiveCommand();
 				if (NFCIPUtils.isNullBlock(checkForNullBlock))
 					throw new NFCIPException("empty block");
 			}
 		} catch (NFCIPException e) {
+			NFCIPUtils.debugMessage(ps, debugLevel, 1, e.getMessage());
 			resetMode();
 			receiveBlockTarget();
 			sendBlockTarget(data, false);
@@ -226,7 +234,7 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 			throw new NFCIPException("expected send");
 		expectedBlockNumber = 0;
 		byte[] res;
-		if (mode == INITIATOR)
+		if (mode == INITIATOR || mode == FAKE_INITIATOR)
 			res = receiveInitiator();
 		else
 			res = receiveTarget();
@@ -240,13 +248,11 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		Vector responses = new Vector();
 		byte[] result = receiveBlock();
 		responses.addElement(result);
-		// responses.addElement(result);
 		expectedBlockNumber = (byte) ((expectedBlockNumber + 1) % 2);
 		while (NFCIPUtils.isChained(result)) {
 			result = receiveBlock();
 			if (NFCIPUtils.getBlockNumber(result) == expectedBlockNumber) {
 				responses.addElement(result);
-				// responses.addElement(result);
 				expectedBlockNumber = (byte) ((expectedBlockNumber + 1) % 2);
 			} else {
 				NFCIPUtils.debugMessage(ps, debugLevel, 2,
@@ -261,24 +267,22 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		Vector responses = new Vector();
 		byte[] result = receiveBlock();
 		responses.addElement(result);
-		// responses.addElement(result);
 		while (NFCIPUtils.isChained(result)) {
 			sendBlock(EMPTY_BLOCK);
 			expectedBlockNumber = (byte) ((expectedBlockNumber + 1) % 2);
 			result = receiveBlock();
 			responses.addElement(result);
-			// responses.addElement(result);
 		}
 		return NFCIPUtils.blockVectorToData(responses);
 	}
 
 	private byte[] receiveBlock() {
 		byte[] res;
-		if (mode == INITIATOR)
+		if (mode == INITIATOR || mode == FAKE_INITIATOR)
 			res = receiveBlockInitiator();
 		else
 			res = receiveBlockTarget();
-		NFCIPUtils.debugMessage(ps, debugLevel, 3, "BLOCK RECV: "
+		NFCIPUtils.debugMessage(ps, debugLevel, 3, "receiveBlock: "
 				+ NFCIPUtils.byteArrayToString(res));
 		noOfRawReceivedBlocks += 1;
 		return res;
@@ -288,10 +292,10 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		byte[] returnBuffer = receiveBuffer;
 		if (NFCIPUtils.isChained(returnBuffer)) {
 			try {
-				// receiveBuffer = transmit(IN_DATA_EXCHANGE, EMPTY_BLOCK);
 				sendCommand(EMPTY_BLOCK);
 				receiveBuffer = receiveCommand();
 			} catch (NFCIPException e) {
+				NFCIPUtils.debugMessage(ps, debugLevel, 1, e.getMessage());
 				resetMode();
 				return receiveBlockInitiator();
 			}
@@ -302,11 +306,11 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	private byte[] receiveBlockTarget() {
 		byte[] resultBuffer;
 		try {
-			// resultBuffer = transmit(TG_GET_DATA, null);
 			resultBuffer = receiveCommand();
 			if (NFCIPUtils.isNullBlock(resultBuffer))
 				throw new NFCIPException("empty block");
 		} catch (NFCIPException e) {
+			NFCIPUtils.debugMessage(ps, debugLevel, 1, e.getMessage());
 			resetMode();
 			return receiveBlockTarget();
 		}
@@ -337,10 +341,10 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	private void endBlockInitiator() {
 		try {
 			NFCIPUtils.debugMessage(ps, debugLevel, 3, "sending end block");
-			// transmit(IN_DATA_EXCHANGE, END_BLOCK);
 			sendCommand(END_BLOCK);
 			receiveCommand();
 		} catch (NFCIPException e) {
+			NFCIPUtils.debugMessage(ps, debugLevel, 1, e.getMessage());
 			resetMode();
 			endBlockInitiator();
 		}
@@ -349,29 +353,30 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	private void endBlockTarget() {
 		byte[] data = null;
 		try {
-			// data = transmit(TG_GET_DATA, null);
 			data = receiveCommand();
 			if (NFCIPUtils.isNullBlock(data))
 				throw new NFCIPException("empty block");
 			if (NFCIPUtils.isEndBlock(data)) {
-				// transmit(TG_SET_DATA, data);
 				sendCommand(data);
 			} else {
 				sendBlock(oldData);
 				endBlockTarget();
 			}
 		} catch (NFCIPException e) {
+			NFCIPUtils.debugMessage(ps, debugLevel, 1, e.getMessage());
 			resetMode();
 			endBlockTarget();
 		}
 	}
 
 	private void resetMode() {
+		NFCIPUtils.debugMessage(ps, debugLevel, 2, "Resetting connection...");
 		numberOfResets++;
 		try {
-			close();
+			releaseTargets();
 			setMode(mode);
 		} catch (NFCIPException e) {
+			NFCIPUtils.debugMessage(ps, debugLevel, 1, e.getMessage());
 		}
 	}
 
@@ -446,4 +451,5 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 
 	protected abstract void setTargetMode() throws NFCIPException;
 
+	protected abstract void releaseTargets() throws NFCIPException;
 }
