@@ -1,5 +1,5 @@
 /*
- * NFCIPConnectionTestMain - Test class for NFCIPConnection (Main)
+ * NFCIPTestMain - Test class for NFCIPConnection
  * 
  * Copyright (C) 2009  François Kooman <F.Kooman@student.science.ru.nl>
  *
@@ -215,7 +215,7 @@ public class NFCIPTestMain {
 					"using minimum data length of " + minDataLength);
 			NFCIPUtils.debugMessage(ps, debugLevel, 2,
 					"using maximum data length of " + maxDataLength);
-			t = new NFCIPTest(n, ps);
+			t = new NFCIPTest(n, ps, debugLevel);
 			t.runTest(numberOfRuns, minDataLength, maxDataLength);
 			n.close();
 		} catch (NFCIPException e) {

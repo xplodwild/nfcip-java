@@ -26,7 +26,7 @@ import java.util.Vector;
 public class NFCIPTest extends Thread {
 	private NFCIPInterface n;
 	private PrintStream ps;
-	private int debugLevel = 0;
+	private int debugLevel;
 
 	/**
 	 * Instantiate the Test Class
@@ -34,9 +34,10 @@ public class NFCIPTest extends Thread {
 	 * @param n
 	 *            the opened connection
 	 */
-	public NFCIPTest(NFCIPInterface n, PrintStream p) {
+	public NFCIPTest(NFCIPInterface n, PrintStream p, int d) {
 		this.n = n;
 		ps = p;
+		debugLevel = d;
 	}
 
 	public void runTest(int numberOfRuns, int minDataLength, int maxDataLength)
@@ -105,24 +106,19 @@ public class NFCIPTest extends Thread {
 		}
 		if (ps != null) {
 			ps.println("=== END OF TEST ===");
-			ps.println("#blocks sent         = " + n.getNumberOfSentBlocks());
-			ps.println("#blocks received     = "
-					+ n.getNumberOfReceivedBlocks());
-			ps
-					.println("#raw blocks sent     = "
-							+ n.getNumberOfRawSentBlocks());
-			ps.println("#raw blocks received = "
-					+ n.getNumberOfRawReceivedBlocks());
-			ps.println("#bytes sent          = " + n.getNumberOfSentBytes());
-			ps
-					.println("#bytes received      = "
-							+ n.getNumberOfReceivedBytes());
-			ps.println("#resets              = " + n.getNumberOfResets());
+			ps.println("#messages sent     = " + n.getNumberOfSentMessages());
+			ps.println("#messages received = "
+					+ n.getNumberOfReceivedMessages());
+			ps.println("#blocks sent       = " + n.getNumberOfSentBlocks());
+			ps.println("#blocks received   = " + n.getNumberOfReceivedBlocks());
+			ps.println("#bytes sent        = " + n.getNumberOfSentBytes());
+			ps.println("#bytes received    = " + n.getNumberOfReceivedBytes());
+			ps.println("#resets            = " + n.getNumberOfResets());
 
 			float packetLoss = (float) n.getNumberOfResets()
-					/ (n.getNumberOfRawSentBlocks() + n
-							.getNumberOfRawReceivedBlocks()) * 100;
-			ps.println("packet loss          = " + packetLoss + "%");
+					/ (n.getNumberOfSentMessages() + n
+							.getNumberOfReceivedMessages()) * 100;
+			ps.println("packet loss        = " + packetLoss + "%");
 			ps.println("run #\ttime(ms)");
 			for (int i = 1; i <= numberOfRuns; i++) {
 				ps.println(i + "\t" + timingResults.elementAt(i - 1));

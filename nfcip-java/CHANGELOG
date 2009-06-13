@@ -20,14 +20,26 @@
 	  - redo handling of debugging to use PrintWriter now for both Java ME and
 	    Java SE
 	  - increase version number to be above both nfcip-java and nfcip-javame
-	  - *TODO* update documentation
-	  - *TODO* update JavaDoc
 	- first attempt to create a "fake" target and initiator mode, the phone's 
 	  target mode is very flaky so this will actually make the phone initiator 
 	  while it behaves as a target (receive data first, then send)
 	- cleanup debug printing
 	- create a util method to print the mode of operation
-	  
+	- create methods to ask whether or not the mode is "initiator" or "target"
+	  sees fake initiator also as initiator and fake target as target	   
+	- updated Javadoc, move as much as possible to the NFCIPInterface
+	- update the README file to reflect the new situation
+	- add licensing information in every source file
+	- remove linked javadoc from abstract class
+	- better naming: messages are now API calls to send/receive and blocks are 
+	  the low level blocks that are sent between initiator and target 
+	- make the debugLevel for the NFCIPTest class configurable through the 
+	  constructor
+	- *TODO* create ds.nfcip.se and ds.nfcip.me packages with respective
+	  NFCIPConnection in there...
+	- *TODO* cleanup README, mention MIDlet
+	- *TODO* new project for NFCIPTestMain and UtilTest?!?
+	
 1.0.2	(20090605)
 	- print some performance metrics for every test run (-r) on the 
 	  command line. Can be used by "gnuplot"

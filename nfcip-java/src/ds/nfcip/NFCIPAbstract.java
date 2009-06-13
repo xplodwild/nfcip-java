@@ -1,3 +1,22 @@
+/*
+ * NFCIPAbstract - Abstract class that takes care of higher level communication
+ *                     
+ * Copyright (C) 2009  François Kooman <F.Kooman@student.science.ru.nl>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
 package ds.nfcip;
 
 import java.io.PrintStream;
@@ -58,13 +77,13 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 
 	protected int noOfReceivedBytes;
 
+	protected int noOfSentMessages;
+
+	protected int noOfReceivedMessages;
+
 	protected int noOfSentBlocks;
 
 	protected int noOfReceivedBlocks;
-
-	protected int noOfRawSentBlocks;
-
-	protected int noOfRawReceivedBlocks;
 
 	protected NFCIPAbstract() {
 		mode = -1;
@@ -75,17 +94,12 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		numberOfResets = 0;
 		noOfSentBytes = 0;
 		noOfReceivedBytes = 0;
+		noOfSentMessages = 0;
+		noOfReceivedMessages = 0;
 		noOfSentBlocks = 0;
 		noOfReceivedBlocks = 0;
-		noOfRawSentBlocks = 0;
-		noOfRawReceivedBlocks = 0;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#setMode(int)
-	 */
 	public void setMode(int mode) throws NFCIPException {
 		this.mode = mode;
 		NFCIPUtils.debugMessage(ps, debugLevel, 1, "Setting mode: "
@@ -120,11 +134,6 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		return mode;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#setBlockSize(int)
-	 */
 	public void setBlockSize(int bs) throws NFCIPException {
 		if (blockSize >= 2 && blockSize <= 240) {
 			blockSize = bs;
@@ -135,27 +144,17 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#setDebugging(java.io.PrintStream, int)
-	 */
 	public void setDebugging(PrintStream p, int b) {
 		debugLevel = b;
 		ps = p;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#send(byte[])
-	 */
 	public void send(byte[] data) throws NFCIPException {
 		if (transmissionMode != SEND)
 			throw new NFCIPException("expected receive");
 		noOfSentBytes += data != null ? data.length : 0;
-		noOfSentBlocks++;
-		if (mode == INITIATOR || mode == FAKE_INITIATOR)
+		noOfSentMessages++;
+		if (isInitiator())
 			sendInitiator(data);
 		else
 			sendTarget(data);
@@ -179,8 +178,8 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	}
 
 	private void sendBlock(byte[] data) {
-		noOfRawSentBlocks++;
-		if (mode == INITIATOR || mode == FAKE_INITIATOR)
+		noOfSentBlocks++;
+		if (isInitiator())
 			sendBlockInitiator(data);
 		else
 			sendBlockTarget(data);
@@ -224,22 +223,17 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#receive()
-	 */
 	public byte[] receive() throws NFCIPException {
 		if (transmissionMode != RECEIVE)
 			throw new NFCIPException("expected send");
 		expectedBlockNumber = 0;
 		byte[] res;
-		if (mode == INITIATOR || mode == FAKE_INITIATOR)
+		if (isInitiator())
 			res = receiveInitiator();
 		else
 			res = receiveTarget();
 		transmissionMode = SEND;
-		noOfReceivedBlocks++;
+		noOfReceivedMessages++;
 		noOfReceivedBytes += res != null ? res.length : 0;
 		return res;
 	}
@@ -278,13 +272,13 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 
 	private byte[] receiveBlock() {
 		byte[] res;
-		if (mode == INITIATOR || mode == FAKE_INITIATOR)
+		if (isInitiator())
 			res = receiveBlockInitiator();
 		else
 			res = receiveBlockTarget();
 		NFCIPUtils.debugMessage(ps, debugLevel, 3, "receiveBlock: "
 				+ NFCIPUtils.byteArrayToString(res));
-		noOfRawReceivedBlocks += 1;
+		noOfReceivedBlocks += 1;
 		return res;
 	}
 
@@ -380,65 +374,38 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		}
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#getNumberOfResets()
-	 */
+	public boolean isInitiator() {
+		return mode == INITIATOR || mode == FAKE_INITIATOR;
+	}
+
+	public boolean isTarget() {
+		return mode == TARGET || mode == FAKE_TARGET;
+	}
+
 	public int getNumberOfResets() {
 		return numberOfResets;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#getNumberOfReceivedBlocks()
-	 */
+	public int getNumberOfReceivedMessages() {
+		return noOfReceivedMessages;
+	}
+
+	public int getNumberOfSentMessages() {
+		return noOfSentMessages;
+	}
+
 	public int getNumberOfReceivedBlocks() {
 		return noOfReceivedBlocks;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#getNumberOfSentBlocks()
-	 */
 	public int getNumberOfSentBlocks() {
 		return noOfSentBlocks;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#getNumberOfRawReceivedBlocks()
-	 */
-	public int getNumberOfRawReceivedBlocks() {
-		return noOfRawReceivedBlocks;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#getNumberOfRawSentBlocks()
-	 */
-	public int getNumberOfRawSentBlocks() {
-		return noOfRawSentBlocks;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#getNumberOfSentBytes()
-	 */
 	public int getNumberOfSentBytes() {
 		return noOfSentBytes;
 	}
 
-	/*
-	 * (non-Javadoc)
-	 * 
-	 * @see ds.nfcip.NFCIPInterface#getNumberOfReceivedBytes()
-	 */
 	public int getNumberOfReceivedBytes() {
 		return noOfReceivedBytes;
 	}
