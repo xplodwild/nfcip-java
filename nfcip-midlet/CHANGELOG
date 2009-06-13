@@ -20,7 +20,9 @@
 	  library instead as to have the same code base as the Java SE application
 	- export the option to set fake initiator/fake target from MIDlet UI
 	- set fake target as default
-
+	- update for NFCIPTest API change 
+	- update sign.properties.default to tell how to sign MIDlet Suite
+	
 1.1.2   (20090605)
 	- replace the "form" for printing progess information with TextField
 	  which is updated once in a while, way more efficient, the form makes 
