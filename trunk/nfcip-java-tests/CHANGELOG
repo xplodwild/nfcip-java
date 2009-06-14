@@ -8,6 +8,7 @@
 	- make the number of resets actually work, not just stick at 1 always
 	- now also send/receive the upper bound (maxDataLength) bytes
 	- update for NFCIPTest API change
+	- extensive update of README
 	
 	App:
 	- remove configurable block size from app

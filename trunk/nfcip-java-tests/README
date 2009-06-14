@@ -1,19 +1,34 @@
                           === Java NFCIP Tests ===
-                       http://nfcip-java.googlecode.com
+                      http://nfcip-java.googlecode.com
 						 
-               François Kooman <F.Kooman@student.science.ru.nl>
+              François Kooman <F.Kooman@student.science.ru.nl>
                								
 
-Reliability Testing
-===================
-Adding the NFCIP library to the classpath is enough to use it. Included are 
-some simple tests that can be run from the command line (or from Eclipse):
+Testing the NFCIP-JAVA library
+==============================
+These test classes use the nfcip-java library [1]. It is automatically 
+downloaded by using the tools/download-libs.sh script as are all the 
+libraries required for the MIDlet to be built:
 
-  $ java -cp dist/nfcip-java-1.0.jar ds.nfcip.tests.NFCIPTestMain
-  
-or specify any other path to where the nfcip-java JAR is located.
+	$ sh tools/download-libs.sh
+	
+After this you can compile the Java SE test application and the Java ME
+test MIDlet:
 
-See "--help" for more information on the parameters possible. One can use 
+	$ ant -f build-se.xml dist
+	$ ant -f build-me.xml deploy
+	
+This will create the test JAR file in the "dist" directory and the test
+MIDlet in the "deployed" directory.
+
+Java SE
+=======
+To run the Java SE test application one runs:
+
+	$ java -cp lib/nfcip-java-se.jar:dist/nfcip-java-se-test-VERSION.jar \
+		ds.nfcip.tests.se.TestApp --help
+		
+This will list for more information on the parameters available. One can use 
 "--list-readers" to find the attached readers, and use "--initiator" or 
 "--target" to specify the mode of operation. 
 
@@ -21,8 +36,8 @@ Suppose one has two ACR122 readers attached to one computer, one can be set
 to initiator and one to target and run the tests to send byte arrays between 
 one another:
 
-  $ java -cp dist/nfcip-java-1.0.jar \
-       ds.nfcip.tests.NFCIPTestMain -i -d 0 -m 100 -M 1000
+	$ java -cp lib/nfcip-java-se.jar:dist/nfcip-java-se-test-VERSION.jar \
+       ds.nfcip.tests.TestApp -i -d 0 -m 100 -M 1000
 
 This will set the first device (-d 0) to initiator mode (-i) and start with 
 sending 100 bytes, then expecting the same 100 bytes back from the target 
@@ -30,11 +45,37 @@ and then move on to 101 bytes, until 1000 is reached.
 
 For the target one would use:
 
-  $ java -cp dist/nfcip-java-1.0.jar \
-       ds.nfcip.tests.NFCIPTestMain -t -d 1 -m 100 -M 1000
+	$ java -cp lib/nfcip-java-se.jar:dist/nfcip-java-se-test-VERSION.jar \
+       ds.nfcip.tests.TestApp -t -d 1 -m 100 -M 1000
 
 It is possible to enable various debugging levels to display an increasing 
-amount of details on the transfer. Without specifying anything nothing is 
-printed unless an error occurs. Use "--debug 1" to see progress information.
-Increase the value to show more details up to including the raw APDUs being
-sent to the ACR122.
+amount of details on the transfer. Without specifying anything only the result
+of the test is printed unless an error occurs. Use "--debug 1" to see progress 
+information. Increase the value to show more details up to including the raw 
+APDUs being sent to the ACR122.
+
+Java ME
+=======
+The MIDlet can be found in the "deployed" directory and can be installed on 
+the phone using Bluetooth file transfer for example. Or by using a memory 
+card. The MIDlet has a UI to configure settings that can also be configured
+by the command line tool. 
+
+The MIDlet has also extensive debugging capabilities like the Java SE test
+application. The path for the log file is hard coded on the external memory
+card. The path can of course be changed by modifying the source code.
+
+In order for logging to work the MIDlet Suite needs permission to write to the 
+phone file system. This can be given by modifying the security parameters of 
+the MIDlet Suite by changing "Application access" that can be found by going
+to MIDlet Suite options in the application menu.
+
+The phone can talk to a ACS ACR122, or to another phone. The radio in the 
+Nokia 6131 NFC is weak, so when the phone is initiator (and thus generates the
+radio field) the ACS ACR122 reader needs to be very close for communication to
+succeed.
+
+References
+==========
+
+[1] http://nfcip-java.googlecode.com
