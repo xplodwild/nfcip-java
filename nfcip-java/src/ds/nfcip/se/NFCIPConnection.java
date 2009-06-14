@@ -1,5 +1,6 @@
 /*
- * NFCIPConnection - NFCIP driver for ACS ACR122 devices
+ * NFCIPConnection - Java SE implementation of NFCIPConnection for the ACS 
+ *                   ACR122
  * 
  * Copyright (C) 2009  François Kooman <F.Kooman@student.science.ru.nl>
  *
@@ -18,7 +19,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 
-package ds.nfcip;
+package ds.nfcip.se;
 
 import java.util.List;
 import javax.smartcardio.Card;
@@ -29,6 +30,17 @@ import javax.smartcardio.CommandAPDU;
 import javax.smartcardio.ResponseAPDU;
 import javax.smartcardio.TerminalFactory;
 
+import ds.nfcip.NFCIPAbstract;
+import ds.nfcip.NFCIPException;
+import ds.nfcip.NFCIPInterface;
+import ds.nfcip.NFCIPUtils;
+
+/**
+ * Java SE implementation of NFCIPConnection for the ACS ACR122
+ * 
+ * @author F. Kooman <F.Kooman@student.science.ru.nl>
+ * 
+ */
 public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 
 	/* PN53x instructions */
@@ -58,6 +70,7 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	 */
 	public NFCIPConnection() {
 		super();
+		blockSize = 240;
 	}
 
 	private void connectToTerminal() throws NFCIPException {
