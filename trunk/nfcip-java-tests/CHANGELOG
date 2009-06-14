@@ -1,4 +1,4 @@
-1.2.0	(?)
+1.2.0	(20090614)
 	General:
 	- put all external libraries in lib/lib.properties to put all version
 	  configuration in this file
@@ -9,6 +9,7 @@
 	- now also send/receive the upper bound (maxDataLength) bytes
 	- update for NFCIPTest API change
 	- extensive update of README
+	- update download script to download version 1.2.0 of the library
 	
 	App:
 	- remove configurable block size from app
