@@ -1,0 +1,66 @@
+1.2.0	(?)
+	General:
+	- put all external libraries in lib/lib.properties to put all version
+	  configuration in this file
+	- update the library download script to accomodate the new 
+	  lib/lib.properties
+	- cleanup the source layout of the build.xml file
+	- make the number of resets actually work, not just stick at 1 always
+	- now also send/receive the upper bound (maxDataLength) bytes
+	- update for NFCIPTest API change
+	
+	App:
+	- remove configurable block size from app
+	- import the App from nfcip-java project
+	
+	MIDlet:
+	- update version of JAD Ant Tasks to 1.1 (supports signing)
+	- create a sign task to sign the MIDlet Suite
+	- add sign.properties.default file to indicate what needs to be set
+	- print the number of resets during the transfer on screen when test is 
+	  complete	  
+	- some Test MIDlet UI updates
+	- remove all the test code from the MIDlet and use the general one
+	  instead 
+	- export the option to set fake initiator/fake target from MIDlet UI
+	- set fake target as default
+ 	- update sign.properties.default to tell how to sign MIDlet Suite
+	- remove configurable block size from UI
+	- make the MIDlet not throw a NullPointerException when a non open 
+	  connection is closed
+	- stop the thread when a running test is cancelled so there will never 
+	  be multiple threads 
+	
+1.1.2   (20090605)
+	- replace the "form" for printing progess information with TextField
+	  which is updated once in a while, way more efficient, the form makes 
+	  the MIDlet slow down A LOT.
+	- actually expose the number of runs in the UI
+	- keep track of the number of connection resets required
+	- update the test to make the number of rounds be within the same
+	  connection, so no new connection between rounds
+    - print *DONE* on screen when test is done
+    - replace the DataOutputStream with a PrintStream to make the files be
+      readable by any text editor
+    - move all classes into a package so we can use the classes as a library
+    - add ant creation of just the library, for use in other projects 
+    - print a dot to the phone screen every successful send/receive loop to
+      make it easier to track progress when using two phones
+    - append the UID (obtained with getUID()) to the log when connection is 
+      established
+    - persistent settings during MIDlet life time (mode, block size, etc.)
+    
+1.1.1   (20090420)
+    - make block size configurable (add UI components)
+    - merge NFCIPConnection from NFCIP library to add support for setBlockSize
+    - update README to point to NFCIP library for platform requirements
+	- added this CHANGELOG
+	    
+1.1     (20090419)
+    - make MIDlet interactive
+    - add licensing headers
+    - include AUTHORS, COPYING file
+    - update README to reflect version 1.1
+
+1.0     (20090418)
+    - initial release
