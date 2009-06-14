@@ -16,4 +16,3 @@ ln -s microemulator-${MICROEMU} microemulator
 # JSR 257 Nokia Extensions Stub Libraries
 wget http://nfcip-java.googlecode.com/files/jsr-257-nokia-${JSR257EXT}.jar
 ln -s jsr-257-nokia-${JSR257EXT}.jar jsr-257-nokia.jar
-
