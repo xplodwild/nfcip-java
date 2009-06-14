@@ -1,4 +1,4 @@
-1.2.0	(?)
+1.2.0	(20090614)
 	- add javadoc target to build file
 	- remove resetNumberOfResets method
 	- now also send/receive the upper bound (maxDataLength) bytes
@@ -42,11 +42,8 @@
 	  nfcip-java-me-VERSION.jar
 	- move all tests to nfcip-java-tests project to make this just contain the
       library
-   	- *TODO* cleanup README
-	- *TODO* mention test project
-	- *TODO* more extensive info on "fake" modes (like that antenna is really
-	  weak in mobile phone when in initiator mode)
-	 
+	- update README to indicate radio is weak in phone
+	
 1.0.2	(20090605)
 	- print some performance metrics for every test run (-r) on the 
 	  command line. Can be used by "gnuplot"

@@ -141,7 +141,12 @@ the switch transparent for the application.
 
 Issues
 ======
+[1]
 There is an issue that when the communication doesn't complete (user 
 interrupted). The next time the program is started it will not be able to 
 connect to the reader without unplugging the reader first. Maybe this can 
 be solved by a Runtime.addShutdownHook in Java.
+
+[2]
+The radio in the Nokia 6131 NFC seems to be weak, so the connection it not 
+really reliable unless the ACS ACR122 reader is held very close to the phone.
