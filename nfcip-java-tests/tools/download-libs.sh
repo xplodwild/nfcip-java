@@ -36,10 +36,8 @@ wget http://nfcip-java.googlecode.com/files/jad-ant-tasks-1.1.jar
 ln -s jad-ant-tasks-${JAT}.jar jad-ant-tasks.jar
 
 # NFCIP-JAVA-SE
-wget http://nfcip-java.googlecode.com/files/nfcip-java-se-${NFCIP_JAVA}.jar
-ln -s nfcip-java-se-${NFCIP_JAVA}.jar nfcip-java-se.jar
-
-# NFCIP-JAVA-ME
-wget http://nfcip-java.googlecode.com/files/nfcip-java-me-${NFCIP_JAVA}.jar
-ln -s nfcip-java-me-${NFCIP_JAVA}.jar nfcip-java-me.jar
+wget http://nfcip-java.googlecode.com/files/nfcip-java-${NFCIP_JAVA}.zip
+unzip -q nfcip-java-${NFCIP_JAVA}.zip
+ln -s nfcip-java-${NFCIP_JAVA}/nfcip-java-se-${NFCIP_JAVA}.jar nfcip-java-se.jar
+ln -s nfcip-java-${NFCIP_JAVA}/nfcip-java-me-${NFCIP_JAVA}.jar nfcip-java-me.jar
 
