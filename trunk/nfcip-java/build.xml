@@ -31,12 +31,12 @@
 
 	<!-- compile -->
 	<target name="compile" depends="init" description="compile the source">
-		<javac srcdir="${src}" destdir="${build}" includes="ds/nfcip/**" />
+		<javac srcdir="${src}" destdir="${build}" includes="ds/nfcip/se/**" />
 		<javac srcdir="${src}"
 		       source="1.3"
 		       target="1.1"
 		       destdir="${buildme}"
-		       includes="ds/nfcipme/**, ds/nfcip/NFCIPTest*"
+		       includes="ds/nfcip/me/**"
 		       classpathref="compile.classpath" />
 	</target>
 
@@ -45,9 +45,9 @@
 	        depends="compile"
 	        description="generate the distribution">
 		<mkdir dir="${dist}" />
-		<jar jarfile="${dist}/${ant.project.name}-${version}.jar"
+		<jar jarfile="${dist}/${ant.project.name}-se-${version}.jar"
 		     basedir="${build}" />
-		<zip zipfile="${dist}/${ant.project.name}me-${version}.jar"
+		<zip zipfile="${dist}/${ant.project.name}-me-${version}.jar"
 		     basedir="${buildme}" />
 	</target>
 

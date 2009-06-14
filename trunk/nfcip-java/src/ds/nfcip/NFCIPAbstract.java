@@ -22,6 +22,13 @@ package ds.nfcip;
 import java.io.PrintStream;
 import java.util.Vector;
 
+/**
+ * Abstract class that implements all functionality required by all
+ * implementations of the NFCIPConnection class.
+ * 
+ * @author F. Kooman <F.Kooman@student.science.ru.nl>
+ * 
+ */
 public abstract class NFCIPAbstract implements NFCIPInterface {
 	protected final byte[] END_BLOCK = { 0x04 };
 	protected final byte[] EMPTY_BLOCK = { 0x08 };
@@ -45,10 +52,16 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	 */
 	protected int debugLevel;
 
+	/**
+	 * The stream to write logging messages to
+	 */
 	protected PrintStream ps;
 
 	/**
-	 * The maximum block size to use for individual blocks
+	 * The maximum block size in bytes to use for individual blocks.
+	 * 
+	 * The block size has to be at least 2 bytes (one byte for the chaining
+	 * indicator and one for the actual data being sent or received)
 	 */
 	protected int blockSize;
 
@@ -58,12 +71,13 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	protected byte expectedBlockNumber;
 
 	/**
-	 * The mode of operation of the NFCIPConnection (either INITIATOR or TARGET)
+	 * The mode of operation of the NFCIPConnection (either INITIATOR, TARGET,
+	 * FAKE_INITIATOR or FAKE_TARGET)
 	 */
 	protected int mode;
 
 	/**
-	 * The expected direction of the transfer (either SEND or RECEIVE)
+	 * The expected operation, either SEND or RECEIVE
 	 */
 	protected int transmissionMode;
 
@@ -73,23 +87,41 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	 */
 	protected int numberOfResets;
 
+	/**
+	 * The number of bytes sent so far
+	 */
 	protected int noOfSentBytes;
 
+	/**
+	 * The number of bytes received so far
+	 */
 	protected int noOfReceivedBytes;
 
+	/**
+	 * The number of sent messages so far
+	 */
 	protected int noOfSentMessages;
 
+	/**
+	 * The number of received messages so far
+	 */
 	protected int noOfReceivedMessages;
 
+	/**
+	 * The number of sent blocks so far
+	 */
 	protected int noOfSentBlocks;
 
+	/**
+	 * The number of received blocks so far
+	 */
 	protected int noOfReceivedBlocks;
 
 	protected NFCIPAbstract() {
 		mode = -1;
 		oldData = null;
 		ps = null;
-		blockSize = 240;
+		blockSize = 100;
 		expectedBlockNumber = 0;
 		numberOfResets = 0;
 		noOfSentBytes = 0;
@@ -132,16 +164,6 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		if (mode < 0)
 			throw new NFCIPException("no mode selected");
 		return mode;
-	}
-
-	public void setBlockSize(int bs) throws NFCIPException {
-		if (blockSize >= 2 && blockSize <= 240) {
-			blockSize = bs;
-			NFCIPUtils.debugMessage(ps, debugLevel, 1, "Setting Block Size to "
-					+ blockSize);
-		} else {
-			throw new NFCIPException("invalid block size");
-		}
 	}
 
 	public void setDebugging(PrintStream p, int b) {
@@ -374,11 +396,21 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		}
 	}
 
-	public boolean isInitiator() {
+	/**
+	 * Returns true is the current mode is either initiator or "fake initiator"
+	 * 
+	 * @return whether or not the mode is initiator or "fake initiator"
+	 */
+	private boolean isInitiator() {
 		return mode == INITIATOR || mode == FAKE_INITIATOR;
 	}
 
-	public boolean isTarget() {
+	/**
+	 * Returns true is the current mode is either target or "fake target"
+	 * 
+	 * @return whether or not the mode is target or "fake target"
+	 */
+	private boolean isTarget() {
 		return mode == TARGET || mode == FAKE_TARGET;
 	}
 

@@ -1,5 +1,5 @@
 /*
- * NFCIPException - Exception for NFCIPConnection
+ * NFCIPException - NFCIPException class
  * 
  * Copyright (C) 2009  François Kooman <F.Kooman@student.science.ru.nl>
  *
@@ -21,6 +21,7 @@
 package ds.nfcip;
 
 /**
+ * NFCIPException class
  * 
  * @author F. Kooman <F.Kooman@student.science.ru.nl>
  * 

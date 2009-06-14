@@ -35,11 +35,18 @@
 	  the low level blocks that are sent between initiator and target 
 	- make the debugLevel for the NFCIPTest class configurable through the 
 	  constructor
-	- *TODO* create ds.nfcip.se and ds.nfcip.me packages with respective
-	  NFCIPConnection in there...
-	- *TODO* cleanup README, mention MIDlet
-	- *TODO* new project for NFCIPTestMain and UtilTest?!?
-	
+	- block size is implementation specific, so put it in the NFCIPConnection
+	  classes and not in the abstract class. We default it to 100 bytes, which
+	  is overridden by the NFCIPConnection for SE and ME to 240 bytes.
+	- change the name of the JAR files to nfcip-java-se-VERSION.jar and 
+	  nfcip-java-me-VERSION.jar
+	- move all tests to nfcip-java-tests project to make this just contain the
+      library
+   	- *TODO* cleanup README
+	- *TODO* mention test project
+	- *TODO* more extensive info on "fake" modes (like that antenna is really
+	  weak in mobile phone when in initiator mode)
+	 
 1.0.2	(20090605)
 	- print some performance metrics for every test run (-r) on the 
 	  command line. Can be used by "gnuplot"

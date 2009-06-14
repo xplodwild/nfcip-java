@@ -24,7 +24,11 @@ import java.io.PrintStream;
 import java.util.Vector;
 
 /**
- * Some small abstract methods used by NFCIPConnection and the tests
+ * Some small abstract methods used by NFCIPConnection implementations and the
+ * tests
+ * 
+ * @author F. Kooman <F.Kooman@student.science.ru.nl>
+ * 
  */
 public class NFCIPUtils {
 	/**

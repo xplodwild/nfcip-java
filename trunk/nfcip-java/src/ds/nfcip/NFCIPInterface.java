@@ -21,6 +21,13 @@ package ds.nfcip;
 
 import java.io.PrintStream;
 
+/**
+ * Interface that specifies the public accessible methods for the
+ * NFCIPConnections.
+ * 
+ * @author F. Kooman <F.Kooman@student.science.ru.nl>
+ * 
+ */
 public interface NFCIPInterface {
 
 	/**
@@ -50,49 +57,41 @@ public interface NFCIPInterface {
 	public final static int FAKE_TARGET = 3;
 
 	/**
-	 * Set the mode of operation (either INITIATOR or TARGET)
+	 * Set the mode of operation (either INITIATOR, TARGET, FAKE_INITIATOR or
+	 * FAKE_TARGET)
 	 * 
 	 * @param mode
-	 *            the mode (INITIATOR or TARGET)
+	 *            the mode (INITIATOR, TARGET, FAKE_INITIATOR or FAKE_TARGET)
 	 * @throws NFCIPException
-	 *             if the operation fails
+	 *             if the mode is invalid or setting the mode fails
 	 */
 	public abstract void setMode(int mode) throws NFCIPException;
 
 	/**
-	 * Set block size for data transfer
-	 * 
-	 * @param bs
-	 *            the block size: 2 <= block size <= 240
-	 * @throws NFCIPException
-	 *             if the block size is invalid
-	 */
-	public abstract void setBlockSize(int bs) throws NFCIPException;
-
-	/**
-	 * Set debug mode
+	 * Set the debug level
 	 * 
 	 * @param p
 	 *            the stream to write the logging to (can be System.out)
 	 * @param b
-	 *            the debug level
+	 *            the level on which debug messages become visible in the log (0
+	 *            is quiet, 5 is maximum detail)
 	 */
 	public abstract void setDebugging(PrintStream p, int b);
 
 	/**
-	 * Send arbitrary amount of data
+	 * Send a message of arbitrary length
 	 * 
 	 * @param data
-	 *            the data to send
+	 *            the message to send
 	 * @throws NFCIPException
 	 *             if the send operation is called while a receive is expected
 	 */
 	public abstract void send(byte[] data) throws NFCIPException;
 
 	/**
-	 * Receive arbitrary amount of data
+	 * Receive a message of arbitrary length
 	 * 
-	 * @return the data received
+	 * @return the received message
 	 * @throws NFCIPException
 	 *             if the receive operation is called while a send is expected
 	 */
@@ -109,9 +108,10 @@ public interface NFCIPInterface {
 	/**
 	 * Get the current mode of the connection
 	 * 
-	 * @return indicator for initiator or target
+	 * @return the current mode of the connection (INITIATOR, TARGET,
+	 *         FAKE_INITIATOR or FAKE_TARGET)
 	 * @throws NFCIPException
-	 *             if no mode currently set
+	 *             if no mode is currently set
 	 */
 	public abstract int getMode() throws NFCIPException;
 
@@ -164,19 +164,4 @@ public interface NFCIPInterface {
 	 * @return the number of received bytes
 	 */
 	public abstract int getNumberOfReceivedBytes();
-
-	/**
-	 * Returns true is the current mode is either initiator or "fake initiator"
-	 * 
-	 * @return whether or not the mode is initiator or "fake initiator"
-	 */
-	public boolean isInitiator();
-
-	/**
-	 * Returns true is the current mode is either target or "fake target"
-	 * 
-	 * @return whether or not the mode is target or "fake target"
-	 */
-	public boolean isTarget();
-
 }
