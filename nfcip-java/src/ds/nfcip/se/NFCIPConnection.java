@@ -1,6 +1,6 @@
 /*
  * NFCIPConnection - Java SE implementation of NFCIPConnection for the ACS 
- *                   ACR122
+ *                   ACR122 NFC reader
  * 
  * Copyright (C) 2009  François Kooman <F.Kooman@student.science.ru.nl>
  *
@@ -36,7 +36,7 @@ import ds.nfcip.NFCIPInterface;
 import ds.nfcip.NFCIPUtils;
 
 /**
- * Java SE implementation of NFCIPConnection for the ACS ACR122
+ * Java SE implementation of NFCIPConnection for the ACS ACR122 NFC reader
  * 
  * @author F. Kooman <F.Kooman@student.science.ru.nl>
  * 
@@ -87,24 +87,20 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 		} catch (CardException e) {
 			throw new NFCIPException("problem with connecting to reader");
 		}
-		NFCIPUtils.debugMessage(ps, debugLevel, 2, "successful connection");
-		NFCIPUtils.debugMessage(ps, debugLevel, 2,
-				"ACS ACR122 firmware version: " + getFirmwareVersion());
+		logMessage(2, "successful connection");
+		logMessage(2, "ACS ACR122 firmware version: " + getFirmwareVersion());
 	}
 
-	/**
-	 * Close current connection
-	 * 
-	 * @throws NFCIPException
-	 *             if the operation fails
-	 */
-	public void close() throws NFCIPException {
-		if (mode == FAKE_INITIATOR)
-			sendCommand(new byte[] { (byte) 0x89 });
+	protected void rawClose() throws NFCIPException {
+		/*
+		 * we don't really need to do anything here as the targets are released
+		 * already by the close method and that is all that is needed for Java
+		 * SE
+		 */
 	}
 
 	protected void releaseTargets() throws NFCIPException {
-		if (mode == INITIATOR || mode == FAKE_TARGET) {
+		if (getMode() == INITIATOR || getMode() == FAKE_TARGET) {
 			/* release all targets */
 			transmit(IN_RELEASE, new byte[] { 0x00 });
 			/*
@@ -121,13 +117,12 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	}
 
 	/**
-	 * Set mode INITIATOR
+	 * Set <code>INITIATOR</code> mode
 	 * 
 	 * @throws NFCIPException
 	 *             if the operation fails
 	 */
 	protected void setInitiatorMode() throws NFCIPException {
-		this.transmissionMode = SEND;
 		// byte[] initiatorPayload = { 0x00, 0x00, 0x00 }; // passive, 106kbps
 		byte[] initiatorPayload = { 0x00, 0x02, 0x01, 0x00, (byte) 0xff,
 				(byte) 0xff, 0x00, 0x00 }; // passive, 424kbps
@@ -138,13 +133,12 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	}
 
 	/**
-	 * Set mode TARGET
+	 * Set <code>TARGET</code> mode
 	 * 
 	 * @throws NFCIPException
 	 *             if the operation fails
 	 */
 	protected void setTargetMode() throws NFCIPException {
-		this.transmissionMode = RECEIVE;
 		byte[] targetPayload = { (byte) 0x00, (byte) 0x08, (byte) 0x00,
 				(byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x40,
 				(byte) 0x01, (byte) 0xFE, (byte) 0xA2, (byte) 0xA3,
@@ -196,7 +190,7 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 		if (ch == null)
 			throw new NFCIPException("channel not open");
 
-		NFCIPUtils.debugMessage(ps, debugLevel, 3, instructionToString(instr));
+		logMessage(3, instructionToString(instr));
 
 		int payloadLength = (payload != null) ? payload.length : 0;
 		byte[] instruction = { (byte) 0xd4, instr };
@@ -223,8 +217,7 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 		cmd = NFCIPUtils.appendToByteArray(cmd, payload);
 
 		try {
-			NFCIPUtils.debugMessage(ps, debugLevel, 4, "Sent     ("
-					+ cmd.length + " bytes): "
+			logMessage(4, "Sent     (" + cmd.length + " bytes): "
 					+ NFCIPUtils.byteArrayToString(cmd));
 
 			CommandAPDU c = new CommandAPDU(cmd);
@@ -232,8 +225,8 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 
 			byte[] ra = r.getBytes();
 
-			NFCIPUtils.debugMessage(ps, debugLevel, 4, "Received (" + ra.length
-					+ " bytes): " + NFCIPUtils.byteArrayToString(ra));
+			logMessage(4, "Received (" + ra.length + " bytes): "
+					+ NFCIPUtils.byteArrayToString(ra));
 
 			/* check whether APDU command was accepted by the ACS ACR122 */
 			if (r.getSW1() == 0x63 && r.getSW2() == 0x27) {
@@ -301,7 +294,7 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	}
 
 	protected void sendCommand(byte[] data) throws NFCIPException {
-		if (mode == INITIATOR || mode == FAKE_TARGET) {
+		if (getMode() == INITIATOR || getMode() == FAKE_TARGET) {
 			tmpSendStorage = transmit(IN_DATA_EXCHANGE, data);
 		} else {
 			transmit(TG_SET_DATA, data);
@@ -309,7 +302,7 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	}
 
 	protected byte[] receiveCommand() throws NFCIPException {
-		if (mode == INITIATOR || mode == FAKE_TARGET) {
+		if (getMode() == INITIATOR || getMode() == FAKE_TARGET) {
 			return tmpSendStorage;
 		} else {
 			return transmit(TG_GET_DATA, null);

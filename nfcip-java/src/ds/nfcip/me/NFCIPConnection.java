@@ -45,14 +45,7 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 		blockSize = 240;
 	}
 
-	/**
-	 * Close current connection (release target when in INITIATOR mode)
-	 * 
-	 * @throws NFCIPException
-	 *             if the operation fails
-	 */
-	public void close() throws NFCIPException {
-		NFCIPUtils.debugMessage(ps, debugLevel, 2, "Closing connection...");
+	public void rawClose() throws NFCIPException {
 		if (c != null)
 			try {
 				c.close();
@@ -61,8 +54,12 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	}
 
 	protected void releaseTargets() throws NFCIPException {
-		NFCIPUtils.debugMessage(ps, debugLevel, 2, "Releasing target...");
-		close();
+		/*
+		 * In Java ME there is no way to release target(s), it is only possible
+		 * to close the connection, which seems to be necessary in order to make
+		 * it possible to open a new connection
+		 */
+		rawClose();
 	}
 
 	/**
@@ -72,11 +69,10 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	 *             if the operation fails
 	 */
 	protected void setInitiatorMode() {
-		NFCIPUtils.debugMessage(ps, debugLevel, 2, "Setting initiator mode...");
-		this.transmissionMode = SEND;
+		logMessage(2, "Setting initiator mode...");
 		try {
 			c = (com.nokia.nfc.p2p.NFCIPConnection) javax.microedition.io.Connector
-					.open(INITIATOR_URL, -1, true);
+					.open(INITIATOR_URL);
 		} catch (Exception e) {
 			setInitiatorMode();
 		}
@@ -89,20 +85,21 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	 *             if the operation fails
 	 */
 	protected void setTargetMode() {
-		NFCIPUtils.debugMessage(ps, debugLevel, 2, "Setting target mode...");
-		this.transmissionMode = RECEIVE;
+		logMessage(2, "Setting target mode...");
 		try {
 			c = (com.nokia.nfc.p2p.NFCIPConnection) javax.microedition.io.Connector
-					.open(TARGET_URL, -1, true);
+					.open(TARGET_URL);
 		} catch (Exception e) {
 			setTargetMode();
 		}
 	}
 
 	protected void sendCommand(byte[] data) throws NFCIPException {
-		NFCIPUtils.debugMessage(ps, debugLevel, 4, "Sent     ("
-				+ (data != null ? data.length : 0) + " bytes): "
-				+ NFCIPUtils.byteArrayToString(data));
+		if (c == null)
+			throw new NFCIPException("sendCommand: connection not open");
+
+		logMessage(4, "Sent     (" + (data != null ? data.length : 0)
+				+ " bytes): " + NFCIPUtils.byteArrayToString(data));
 		try {
 			c.send(data);
 		} catch (Exception e) {
@@ -111,11 +108,12 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	}
 
 	protected byte[] receiveCommand() throws NFCIPException {
+		if (c == null)
+			throw new NFCIPException("sendCommand: connection not open");
 		try {
 			byte[] recv = c.receive();
-			NFCIPUtils.debugMessage(ps, debugLevel, 4, "Received ("
-					+ (recv != null ? recv.length : 0) + " bytes): "
-					+ NFCIPUtils.byteArrayToString(recv));
+			logMessage(4, "Received (" + (recv != null ? recv.length : 0)
+					+ " bytes): " + NFCIPUtils.byteArrayToString(recv));
 			return recv;
 		} catch (Exception e) {
 			throw new NFCIPException("native receive error: " + e.toString());
