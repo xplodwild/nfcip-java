@@ -20,7 +20,6 @@
 
 package ds.nfcip;
 
-import java.io.PrintStream;
 import java.util.Vector;
 
 /**
@@ -31,6 +30,10 @@ import java.util.Vector;
  * 
  */
 public class NFCIPUtils {
+
+	private NFCIPUtils() {
+	}
+
 	/**
 	 * Converts a byte array to readable string
 	 * 
@@ -110,26 +113,6 @@ public class NFCIPUtils {
 	 */
 	public static byte[] subByteArray(byte[] array, int offset, int length) {
 		return appendToByteArray(null, array, offset, length);
-	}
-
-	/**
-	 * Print a message when debugMode is enabled
-	 * 
-	 * @param debugLevel
-	 *            specify the parameter indicating the debug level
-	 * @param debugThreshold
-	 *            the threshold for triggering the specific debug message to
-	 *            appear
-	 * @param message
-	 *            the message to print
-	 */
-	public static void debugMessage(PrintStream ps, int debugLevel,
-			int debugThreshold, String message) {
-		if (ps == null)
-			return;
-		if (debugLevel >= debugThreshold) {
-			ps.println("[DEBUG] " + message);
-		}
 	}
 
 	/**
@@ -388,6 +371,21 @@ public class NFCIPUtils {
 	 */
 	public static boolean isNullBlock(byte[] data) {
 		return data == null || data.length == 0;
+	}
+
+	/**
+	 * Checks whether this block is a "dummy" block, this is used for the
+	 * <code>FAKE_INITIATOR</code> and <code>FAKE_TARGET</code> modes to switch
+	 * to send respectively receive mode
+	 * 
+	 * @param data
+	 *            the data to analyze
+	 * @return whether or not this is a "dummy" block
+	 */
+	public static boolean isDummyBlock(byte[] data) {
+		if (data == null || data.length == 0)
+			return false;
+		return (data[0] & 0x88) == 0x88;
 	}
 
 	// Taken from OpenJDK sources (GPLv2 only)
