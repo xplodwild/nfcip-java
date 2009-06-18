@@ -10,7 +10,8 @@
 	- fix the debugMessage stuff, take it out of NFCIPUtils and put it in 
 	  NFCIPAbstract & rename it to "log" instead of "debug"
 	- take some irrelevant stuff out of the interface
-	
+	- make everything more consistent
+
 1.2.0	(20090614)
 	- add javadoc target to build file
 	- remove resetNumberOfResets method

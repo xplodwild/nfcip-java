@@ -56,6 +56,7 @@
 		<mkdir dir="${doc}" />
 		<javadoc sourcepath="${src}"
 		         excludepackagenames="ds.nfcip.tests.*, ds.nfcipme.tests.*"
+		         access="protected"
 		         destdir="${doc}"
 		         classpathref="compile.classpath"
 		         failonerror="true" />
