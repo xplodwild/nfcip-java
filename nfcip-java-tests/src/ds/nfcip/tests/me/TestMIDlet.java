@@ -42,14 +42,14 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 	private int numberOfRuns;
 	private int minDataLength;
 	private int maxDataLength;
-	private int debugLevel;
+	private int logLevel;
 
 	/* Position of settings in RMS */
 	private final static int S_MODE = 1;
 	private final static int S_NUMBER_OF_RUNS = 2;
 	private final static int S_MIN_DATA_LENGTH = 3;
 	private final static int S_MAX_DATA_LENGTH = 4;
-	private final static int S_DEBUG_LEVEL = 5;
+	private final static int S_LOG_LEVEL = 5;
 
 	PersistentSettings ps = null;
 
@@ -64,13 +64,13 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 			ps.addSetting(1); /* S_NUMBER_OF_RUNS */
 			ps.addSetting(200); /* S_MIN_DATA_LENGTH */
 			ps.addSetting(300); /* S_MAX_DATA_LENGTH */
-			ps.addSetting(0); /* S_DEBUG_LEVEL */
+			ps.addSetting(0); /* S_LOG_LEVEL */
 		}
 		mode = ps.getSetting(S_MODE);
 		numberOfRuns = ps.getSetting(S_NUMBER_OF_RUNS);
 		minDataLength = ps.getSetting(S_MIN_DATA_LENGTH);
 		maxDataLength = ps.getSetting(S_MAX_DATA_LENGTH);
-		debugLevel = ps.getSetting(S_DEBUG_LEVEL);
+		logLevel = ps.getSetting(S_LOG_LEVEL);
 	}
 
 	protected void destroyApp(boolean arg0) throws MIDletStateChangeException {
@@ -90,7 +90,7 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 		menu.append("Set Mode", null);
 		menu.append("Set Number Of Runs", null);
 		menu.append("Set Test Range", null);
-		menu.append("Set Debugging", null);
+		menu.append("Set Logging", null);
 		menu.append("Start", null);
 		menu.addCommand(exitCommand);
 		menu.setCommandListener(this);
@@ -140,8 +140,8 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 		currentMenu = "setTestRange";
 	}
 
-	private void chooseDebugging() {
-		choose = new List("Set Debugging Level", Choice.EXCLUSIVE);
+	private void chooseLogging() {
+		choose = new List("Set Log Level", Choice.EXCLUSIVE);
 		choose.addCommand(backCommand);
 		choose.setCommandListener(this);
 		choose.append("Disabled", null);
@@ -150,9 +150,9 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 		choose.append("Level 3", null);
 		choose.append("Level 4", null);
 		choose.append("Level 5", null);
-		choose.setSelectedIndex(debugLevel, true);
+		choose.setSelectedIndex(logLevel, true);
 		display.setCurrent(choose);
-		currentMenu = "setDebugging";
+		currentMenu = "setLogging";
 	}
 
 	private void startConnection() {
@@ -175,7 +175,7 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 	}
 
 	public void run() {
-		if (debugLevel > 0) {
+		if (logLevel > 0) {
 			try {
 				FileConnection filecon = (FileConnection) Connector
 						.open("file:///E:/NFCIP-logfile.txt");
@@ -192,10 +192,10 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 		try {
 			statusField.setString("Waiting...");
 			m = new NFCIPConnection();
-			m.setDebugging(printStream, debugLevel);
+			m.setLogging(printStream, logLevel);
 			m.setMode(mode);
 			statusField.setString("Running...");
-			NFCIPTest t = new NFCIPTest(m, printStream, debugLevel);
+			NFCIPTest t = new NFCIPTest(m, printStream);
 			t.runTest(numberOfRuns, minDataLength, maxDataLength);
 			statusField.setString("Finished! (#resets = "
 					+ m.getNumberOfResets() + ")");
@@ -231,9 +231,9 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 						.parseInt(maxDataLengthField.getString());
 				ps.updateSetting(S_MAX_DATA_LENGTH, maxDataLength);
 			}
-			if (currentMenu.equals("setDebugging")) {
-				debugLevel = choose.getSelectedIndex();
-				ps.updateSetting(S_DEBUG_LEVEL, debugLevel);
+			if (currentMenu.equals("setLogging")) {
+				logLevel = choose.getSelectedIndex();
+				ps.updateSetting(S_LOG_LEVEL, logLevel);
 			}
 			if (currentMenu.equals("runningTest")) {
 				if (m != null) {
@@ -250,7 +250,7 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 					|| currentMenu.equals("setNumberOfRuns")
 					|| currentMenu.equals("setTestRange")
 					|| currentMenu.equals("runningTest")
-					|| currentMenu.equals("setDebugging")) {
+					|| currentMenu.equals("setLogging")) {
 				mainMenu();
 			}
 		} else {
@@ -266,7 +266,7 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 				chooseTestRange();
 				break;
 			case 3:
-				chooseDebugging();
+				chooseLogging();
 				break;
 			case 4:
 				startConnection();

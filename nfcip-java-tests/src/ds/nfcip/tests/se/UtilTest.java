@@ -202,7 +202,8 @@ public class UtilTest {
 		// v = Util.dataToBlockVector(dtbv, 4);
 
 		for (int i = 0; i < v.size(); i++) {
-			System.out.println(NFCIPUtils.byteArrayToString((byte[]) v.elementAt(i)));
+			System.out.println(NFCIPUtils.byteArrayToString((byte[]) v
+					.elementAt(i)));
 		}
 
 		/* chaining indicator tests */

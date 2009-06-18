@@ -40,7 +40,7 @@ public class TestApp {
 		NFCIPTest t;
 		int testMode = -1;
 		int numberOfRuns = 1;
-		int debugLevel = 0; /* we don't print anything by default */
+		int logLevel = 0; /* we don't print anything by default */
 		int terminalNumber = -1;
 
 		/* the card terminals */
@@ -77,13 +77,13 @@ public class TestApp {
 				testMode = NFCIPInterface.FAKE_TARGET;
 			}
 
-			if (args[i].equals("--debug")) {
+			if (args[i].equals("--log")) {
 				i++;
 				try {
-					debugLevel = Integer.parseInt(args[i]);
+					logLevel = Integer.parseInt(args[i]);
 				} catch (NumberFormatException e) {
 					System.err
-							.println("--debug should be followed by a numerical debugging level");
+							.println("--log should be followed by an integer log level");
 					return;
 				}
 			}
@@ -185,20 +185,15 @@ public class TestApp {
 		NFCIPConnection n = null;
 		try {
 			n = new NFCIPConnection();
-			n.setDebugging(ps, debugLevel);
+			n.setLogging(ps, logLevel);
 			n.setTerminal(terminalNumber);
-			n.close();
 			n.setMode(testMode);
-			NFCIPUtils.debugMessage(ps, debugLevel, 2, "terminal number: "
-					+ terminalNumber);
+			System.out.println("terminal number: " + terminalNumber);
 
-			NFCIPUtils.debugMessage(ps, debugLevel, 2, "mode: "
-					+ NFCIPUtils.modeToString(testMode));
-			NFCIPUtils.debugMessage(ps, debugLevel, 2,
-					"using minimum data length of " + minDataLength);
-			NFCIPUtils.debugMessage(ps, debugLevel, 2,
-					"using maximum data length of " + maxDataLength);
-			t = new NFCIPTest(n, ps, debugLevel);
+			System.out.println("mode: " + NFCIPUtils.modeToString(testMode));
+			System.out.println("using minimum data length of " + minDataLength);
+			System.out.println("using maximum data length of " + maxDataLength);
+			t = new NFCIPTest(n, ps);
 			t.runTest(numberOfRuns, minDataLength, maxDataLength);
 			n.close();
 		} catch (NFCIPException e) {
@@ -226,7 +221,7 @@ public class TestApp {
 		System.out
 				.println("  --terminal i [-d i]        Specify the terminal to use, see --list-terminals");
 		System.out
-				.println("  --debug i                  Debug level, specify a number between 0 and 5");
+				.println("  --log i                    Log level, specify a number between 0 and 5");
 		System.out
 				.println("  --runs i [-r i]            Number of runs of the test to perform");
 		System.out

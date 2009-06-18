@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <project name="nfcip-java-tests-se" default="compile" basedir=".">
 	<description>Test Classes for the NFCIP Java library</description>
-	<property name="version" value="1.2.0" />
+	<property name="version" value="1.3.0" />
 
 	<!-- set global properties for this build -->
 	<property name="src" location="src" />
