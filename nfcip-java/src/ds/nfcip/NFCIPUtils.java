@@ -100,8 +100,8 @@ public class NFCIPUtils {
 	}
 
 	/**
-	 * Return a specific part of a byte array starting from <em>offset</em> with
-	 * <em>length</em>
+	 * Return a specific part of a byte array starting from <code>offset</code>
+	 * with <code>length</code>
 	 * 
 	 * @param array
 	 *            the byte array
@@ -212,6 +212,9 @@ public class NFCIPUtils {
 	 *            set in the first byte of each block. The bit set to one means
 	 *            there is more data coming, set to 0 means there is no more
 	 *            data after this block
+	 * @param addBlockNumbers
+	 *            whether or not to use block numbers in the chaining indicator
+	 *            byte
 	 * @return vector of byte arrays containing the split byte array
 	 */
 	public static Vector dataToBlockVector(byte[] data, int blockSize,
@@ -422,6 +425,13 @@ public class NFCIPUtils {
 		return true;
 	}
 
+	/**
+	 * Converts the mode to human readable format
+	 * 
+	 * @param mode
+	 *            the mode to convert
+	 * @return the human readable mode
+	 */
 	public static String modeToString(int mode) {
 		switch (mode) {
 		case NFCIPInterface.INITIATOR:

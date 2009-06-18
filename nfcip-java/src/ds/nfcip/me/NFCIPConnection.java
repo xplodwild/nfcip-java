@@ -37,9 +37,6 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	private static final String INITIATOR_URL = "nfc:rf;type=nfcip;mode=initiator";
 	private static final String TARGET_URL = "nfc:rf;type=nfcip;mode=target";
 
-	/**
-	 * Instantiate a new NFCIPConnection object
-	 */
 	public NFCIPConnection() {
 		super();
 		blockSize = 240;
@@ -62,12 +59,6 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 		rawClose();
 	}
 
-	/**
-	 * Set mode INITIATOR
-	 * 
-	 * @throws NFCIPException
-	 *             if the operation fails
-	 */
 	protected void setInitiatorMode() {
 		logMessage(2, "Setting initiator mode...");
 		try {
@@ -78,12 +69,6 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 		}
 	}
 
-	/**
-	 * Set mode TARGET
-	 * 
-	 * @throws NFCIPException
-	 *             if the operation fails
-	 */
 	protected void setTargetMode() {
 		logMessage(2, "Setting target mode...");
 		try {

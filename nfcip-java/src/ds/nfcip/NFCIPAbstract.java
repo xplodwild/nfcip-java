@@ -184,16 +184,16 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	/**
 	 * Set the log level.
 	 * 
-	 * @param p
+	 * @param ps
 	 *            the stream to write the logging to (can be
 	 *            <code>System.out</code>, or <code>null</code>)
 	 * @param logLevel
 	 *            the level on which log messages become visible in the log (0 =
 	 *            nothing appears, 5 = maximum detail)
 	 */
-	public void setLogging(PrintStream p, int l) {
-		logLevel = l;
-		ps = p;
+	public void setLogging(PrintStream ps, int logLevel) {
+		this.logLevel = logLevel;
+		this.ps = ps;
 	}
 
 	/**
@@ -221,7 +221,7 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 			throw new NFCIPException("expected receive");
 		noOfSentBytes += data != null ? data.length : 0;
 		noOfSentMessages++;
-		if (isInitiator())
+		if (mode == INITIATOR || mode == FAKE_INITIATOR)
 			sendInitiator(data);
 		else
 			sendTarget(data);
@@ -246,7 +246,7 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 
 	private void sendBlock(byte[] data) {
 		noOfSentBlocks++;
-		if (isInitiator())
+		if (mode == INITIATOR || mode == FAKE_INITIATOR)
 			sendBlockInitiator(data);
 		else
 			sendBlockTarget(data);
@@ -295,7 +295,7 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 			throw new NFCIPException("expected send");
 		expectedBlockNumber = 0;
 		byte[] res;
-		if (isInitiator())
+		if (mode == INITIATOR || mode == FAKE_INITIATOR)
 			res = receiveInitiator();
 		else
 			res = receiveTarget();
@@ -338,7 +338,7 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 
 	private byte[] receiveBlock() {
 		byte[] res;
-		if (isInitiator())
+		if (mode == INITIATOR || mode == FAKE_INITIATOR)
 			res = receiveBlockInitiator();
 		else
 			res = receiveBlockTarget();
@@ -446,24 +446,6 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 		rawClose();
 	}
 
-	/**
-	 * Returns true is the current mode is either initiator or "fake initiator".
-	 * 
-	 * @return whether or not the mode is initiator or "fake initiator"
-	 */
-	private boolean isInitiator() {
-		return mode == INITIATOR || mode == FAKE_INITIATOR;
-	}
-
-	/**
-	 * Returns true is the current mode is either target or "fake target".
-	 * 
-	 * @return whether or not the mode is target or "fake target"
-	 */
-	private boolean isTarget() {
-		return mode == TARGET || mode == FAKE_TARGET;
-	}
-
 	public int getNumberOfResets() {
 		return numberOfResets;
 	}
@@ -493,8 +475,7 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	}
 
 	/**
-	 * This method should implement the low level send functionality for sending
-	 * a block of maximum size <code>blockSize</code>.
+	 * Low level send of a block of maximum size <code>blockSize</code>.
 	 * 
 	 * @param data
 	 *            the block to send
@@ -504,8 +485,7 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	protected abstract void sendCommand(byte[] data) throws NFCIPException;
 
 	/**
-	 * This method should implement the low level receive functionality for
-	 * receiving a block of maximum size <code>blockSize</code>.
+	 * Low level receive of a block of maximum size <code>blockSize</code>.
 	 * 
 	 * @return the block data
 	 * @throws NFCIPException
@@ -514,8 +494,7 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	protected abstract byte[] receiveCommand() throws NFCIPException;
 
 	/**
-	 * This method should implement setting the NFCIP device in
-	 * <code>INITIATOR</code> mode.
+	 * Set the NFCIP device in <code>INITIATOR</code> mode.
 	 * 
 	 * @throws NFCIPException
 	 *             if setting the mode fails
@@ -523,8 +502,7 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	protected abstract void setInitiatorMode() throws NFCIPException;
 
 	/**
-	 * This method should implement setting the NFCIP device in
-	 * <code>TARGET</code> mode.
+	 * Set the NFCIP device in <code>TARGET</code> mode.
 	 * 
 	 * @throws NFCIPException
 	 *             if setting the mode fails
@@ -532,15 +510,14 @@ public abstract class NFCIPAbstract implements NFCIPInterface {
 	protected abstract void setTargetMode() throws NFCIPException;
 
 	/**
-	 * This method should implement closing the connection.
+	 * Close the connection.
 	 * 
 	 * @throws NFCIPException
 	 */
 	protected abstract void rawClose() throws NFCIPException;
 
 	/**
-	 * This method should implement a way to release the target(s) the initiator
-	 * has established a connection to.
+	 * Release the target(s) the initiator has an established connection with.
 	 * 
 	 * @throws NFCIPException
 	 *             if releasing the target(s) fails

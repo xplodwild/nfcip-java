@@ -65,9 +65,6 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	private CardTerminal terminal = null;
 	private CardChannel ch = null;
 
-	/**
-	 * Instantiate a new NFCIPConnection object
-	 */
 	public NFCIPConnection() {
 		super();
 		blockSize = 240;
@@ -116,12 +113,6 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 		}
 	}
 
-	/**
-	 * Set <code>INITIATOR</code> mode
-	 * 
-	 * @throws NFCIPException
-	 *             if the operation fails
-	 */
 	protected void setInitiatorMode() throws NFCIPException {
 		// byte[] initiatorPayload = { 0x00, 0x00, 0x00 }; // passive, 106kbps
 		byte[] initiatorPayload = { 0x00, 0x02, 0x01, 0x00, (byte) 0xff,
@@ -132,12 +123,6 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 		transmit(IN_JUMP_FOR_DEP, initiatorPayload);
 	}
 
-	/**
-	 * Set <code>TARGET</code> mode
-	 * 
-	 * @throws NFCIPException
-	 *             if the operation fails
-	 */
 	protected void setTargetMode() throws NFCIPException {
 		byte[] targetPayload = { (byte) 0x00, (byte) 0x08, (byte) 0x00,
 				(byte) 0x12, (byte) 0x34, (byte) 0x56, (byte) 0x40,
@@ -181,7 +166,7 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 	 * 
 	 * @param instr
 	 *            The PN53x instruction
-	 * @param param
+	 * @param payload
 	 *            The payload to send
 	 * 
 	 * @return The response payload (without instruction bytes and status bytes)
