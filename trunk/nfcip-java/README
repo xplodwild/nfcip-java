@@ -1,5 +1,5 @@
-           === Java NFCIPConnection library for Java SE and Java ME ===
-                       http://nfcip-java.googlecode.com
+          === Java NFCIPConnection library for Java SE and Java ME ===
+                      http://nfcip-java.googlecode.com
 						 
                François Kooman <F.Kooman@student.science.ru.nl>
                								
@@ -7,9 +7,20 @@ Introduction
 ============
 This project is a Java library to facilitate communication over NFCIP (Peer 2 
 Peer) using ACS ACR122 NFC terminals and/or Nokia NFC capable phones. The 
-library provides a reliable (i.e. resumes after connection tear) byte array 
-communication channel between these NFC devices. This project provides a 
-library for running in the Java SE and Java ME environment.
+library provides a reliable (i.e. resumes after connection tear) byte array of 
+unlimited length communication channel between these NFC devices. This project 
+provides a library for running in the Java SE and Java ME environment. 
+
+NFCIP is a means of communication between two NFC capable devices to exchange 
+(byte) data between them. There are two modes of operation: INITIATOR and 
+TARGET. The INITIATOR opens the connection and starts sending data to the 
+TARGET. The TARGET starts receiving data and responds to this. At that time the
+INTIATOR receives this data again. The INITIATOR first has to send, and then 
+receive. The target has to first receive and then send. This sending and 
+receiving can be repeated indefinitely. 
+
+The library provides support for both INITIATOR and TARGET mode on both the 
+Java SE and Java ME platform.
 
 The library was tested with:
  * two ACS ACR122 readers (firmware ACR122U102)
@@ -20,85 +31,46 @@ This library was tested on:
  * Fedora 11 x86_64 with the provided OpenJDK 
  * Ubuntu 9.04 x86_64 with the provided OpenJDK
 
-Platform Requirements
-=====================
-Windows (Vista):
- * Install Sun's Java 6 JRE (or JDK if you want to compile from source)
- * Plug in the reader(s). The drivers are included with Vista
+Requirements
+============
+The library for the Java SE platform requires Java 6 (which supports the 
+javax.smartcardio.* API). On Windows this is sufficient, on Linux one can 
+use OpenJDK (included with most distributions nowadays) or Sun's JRE/JDK.  
+
+On Linux one also needs to install the pcsc-lite development libraries in 
+order to be able to access the ACS ACR122 reader:
+
+Fedora:
+	# yum install pcsc-lite-devel
+
+Ubuntu:
+	$ sudo apt-get install libpcsclite-dev
+
+We tested Ubuntu and Fedora using the included OpenJDK.
+
+Using
+=====
+We assume that the smart card reader is detected by the operating system. In 
+Windows this should not be a problem as they are detected automatically as a 
+PCSC terminal. In Linux (when the correct software is installed) it should also
+work out of the box. In Linux one needs to have "pcsc-lite" available with the 
+"ccid" drivers. This software can usually be found in the distribution's 
+package management system.
+
+For Java SE one should just include the "nfcip-java-se-VERSION.jar" file 
+in the application's classpath.
+
+For Java ME one has to go through a bit more trouble. In addition to the 
+library "nfcip-java-me-VERSION.jar" one also needs to add the JSR-257 Nokia 
+proprietary extension API. This library should only be used for compilation
+and not packaged together with the rest of the application, while the 
+nfcip-java-me-VERSION.jar file must be packaged together with the application.
+
+See the nfcip-java-tests project for building examples for both Java SE and
+Java ME.
  
- * Install Ant (get it from http://ant.apache.org)
- * Set all environment variables. I use the script below to make Java and
-   Ant work like it would on Unix from the command line:
-   
-   == cut ==
-   @ECHO OFF
-   REM set JAVA_HOME=C:\Program Files\Java\jdk1.6.0_13
-   set JAVA_HOME=C:\Program Files (x86)\Java\jdk1.6.0_13
-   set ANT_HOME=%USERPROFILE%\java\apache-ant-1.7.1
-   set PATH=%PATH%;%JAVA_HOME%\bin;%ANT_HOME%\bin
-   == cut ==
-   
-   Make sure you change this for your platform! This JAVA_HOME path is for 32 
-   bit Java on 64 bit Windows.
-   
-Fedora 11:
- * Java is installed by default on Fedora, but in case it is not installed
-   you can install everything required like this:
-   
-   You can install the missing components using:
-   
-     # yum install ant java-1.6.0-openjdk-devel pcsc-lite-devel
-
-Ubuntu 9.04:
- * You need to manually install some components to make it work:
-   
-     "sudo apt-get install openjdk-6-jre pcscd libccid libpcsclite-dev"
-
-   If you want to compile from source you also need to install Ant:
-
-     "sudo apt-get install ant"
-     
-   This should do the trick.
-   
-In addition, to build the Java ME library (which is done by default) one 
-should install the CLDC/MIDP/JSR-257 libraries as well. They are provided
-by:
- 
- * MicroEmulator (http://www.microemu.org/)
-	Tested with version 2.0.3
- * JSR 257 Nokia Extension Stub Library (http://nfcip-java.googlecode.com)
- 	Tested with version 1.0	
- 	
-The script in the tools directory (download-libs.sh) takes care of 
-downloading and extracting them in the correct location (in the "lib" 
-directory) In order to download and extract the files run:
-
-	$ sh tools/download-libs.sh
-
-Now you should be able to build everything.
-
-Building
-========
-The easiest way to build this project is to use Ant. We assume that you 
-followed the instructions above.
-
-  $ ant dist
-
-Will generate the JAR files in the "dist" directory ready for use. There 
-will be two libraries:
-
-	- nfcip-java-VERSION.jar
-	- nfcip-javame-VERSION.jar
-	
-The first one is for the Java SE environment, the second on is for use on
-the phone. See the API documentation on how to use them. 
-
 API documentation
 =================
-To generate the API documentation, run:
-	
-	$ ant doc
-
 In case one wants to initialize as initiator and send/receive some data
 to/from a target one would use:
 
@@ -123,7 +95,68 @@ data:
 	n.send(response);
 	n.close();
 
-The API for Java SE and Java ME platforms are identical.
+The API for Java SE and Java ME platforms are mostly identical, the API for 
+Java SE has the ability to set the terminal device number (setTerminal) to
+specify which NFC reader to use if multiple are available, this is not 
+available on the Java ME version of the library.
+
+Build Requirements
+==================
+Windows (Vista):
+ * Install Sun's Java 6 JDK
+ * Plug in the reader(s). The drivers are included with Vista.
+ 
+ * Install Ant (get it from http://ant.apache.org)
+ * Set all environment variables. I use the script below to make Java and
+   Ant work like it would on Unix from the command line:
+   
+   === cut ===
+   @ECHO OFF
+   REM set JAVA_HOME=C:\Program Files\Java\jdk1.6.0_13
+   set JAVA_HOME=C:\Program Files (x86)\Java\jdk1.6.0_13
+   set ANT_HOME=%USERPROFILE%\java\apache-ant-1.7.1
+   set PATH=%PATH%;%JAVA_HOME%\bin;%ANT_HOME%\bin
+   === cut ===
+   
+   Make sure you change this for your platform! This JAVA_HOME path is for 32 
+   bit Java on 64 bit Windows.
+   
+Fedora:
+     # yum install ant java-1.6.0-openjdk-devel
+
+Ubuntu:
+     $ sudo apt-get install ant openjdk-6-jre pcscd libccid
+   
+In addition, to build the Java ME library (which is done by default) one 
+should install the CLDC/MIDP/JSR-257 libraries as well. They are provided
+by:
+ 
+ * MicroEmulator (http://www.microemu.org/)
+	Tested with version 2.0.3
+ * JSR 257 Nokia Extension Stub Library (http://nfcip-java.googlecode.com)
+ 	Tested with version 1.0	
+ 	
+The script in the tools directory (download-libs.sh) takes care of 
+downloading and extracting them in the correct location (in the "lib" 
+directory) In order to download and extract the files run:
+
+	$ sh tools/download-libs.sh
+
+Building
+========
+The easiest way to build this project is to use Ant. We assume that you 
+followed the instructions above.
+
+  $ ant dist
+
+Will generate the JAR files in the "dist" directory ready for use. There 
+will be two libraries:
+
+	- nfcip-java-se-VERSION.jar
+	- nfcip-java-me-VERSION.jar
+	
+The first one is for the Java SE environment, the second on is for use on
+the phone. See the API documentation on how to use them. 
 
 Alternative Modes of operation (FAKE_INITIATOR and FAKE_TARGET)
 ===============================================================
@@ -141,12 +174,14 @@ the switch transparent for the application.
 
 Issues
 ======
-[1]
 There is an issue that when the communication doesn't complete (user 
 interrupted). The next time the program is started it will not be able to 
 connect to the reader without unplugging the reader first. Maybe this can 
 be solved by a Runtime.addShutdownHook in Java.
 
-[2]
 The radio in the Nokia 6131 NFC seems to be weak, so the connection it not 
 really reliable unless the ACS ACR122 reader is held very close to the phone.
+
+The FAKE_INTIATOR and FAKE_TARGET modes of operation are not as reliable 
+against connection tear as the INITIATOR and TARGET mode. This should be fixed
+some time.
