@@ -1,18 +1,13 @@
 <?xml version="1.0"?>
-<project name="nfcip-java-tests-me" default="compile" basedir=".">
-	<description>NFCIP Java ME MIDlet Test Suite</description>
+<project name="nfcip-java-tests" default="compile" basedir=".">
+	<description>NFCIP Java SE and Java ME Tests</description>
 
 	<property name="version" value="1.3.0" />
-	<property name="midlet.vendor" value="Radboud University Nijmegen" />
-	<property name="midlet.name" value="NFCIP Test" />
-	<property name="midlet.class" value="ds.nfcip.tests.me.TestMIDlet" />
-	<property name="midlet.suitename" value="NFCIP Test Suite" />
-	<property name="source" value="1.3" />
-	<property name="target" value="1.1" />
 
 	<!-- set global properties for this build -->
 	<property name="src" location="src" />
 	<property name="build" location="build" />
+	<property name="build-se" location="build/se" />
 	<property name="build-me" location="build/me" />
 	<property name="dist" location="dist" />
 	<property name="deployed" location="deployed" />
@@ -27,24 +22,29 @@
 
 	<!-- these are the libraries that are just needed for compilation as the 
 	     phone has implementations of those -->
-	<path id="compile.classpath">
+	<path id="me.phone.lib">
 		<pathelement location="${cldc.jar}" />
 		<pathelement location="${midp.jar}" />
 		<pathelement location="${jsr-75.jar}" />
 		<pathelement location="${jsr-257-nokia.jar}" />
 	</path>
 
-	<!-- these are the libraries that actually need to be added to the MIDlet 
-	     Suite -->
-	<path id="injars.classpath">
+	<!-- these are the libraries that actually need to be included in the MIDlet 
+	     Suite, the phone does not have implementations of these -->
+	<path id="me.app.lib">
 		<pathelement location="${nfcip-java-me.jar}" />
-		<pathelement location="${dist}/${ant.project.name}-${version}.jar" />
+		<pathelement location="${dist}/${ant.project.name}-me-${version}.jar" />
 	</path>
 
 	<!-- this is used for compiling, we need all libraries here -->
-	<path id="all.classpath">
-		<path refid="injars.classpath" />
-		<path refid="compile.classpath" />
+	<path id="me.classpath">
+		<path refid="me.phone.lib" />
+		<path refid="me.app.lib" />
+	</path>
+
+	<!-- this is used for the Java SE test application -->
+	<path id="se.classpath">
+		<pathelement location="${nfcip-java-se.jar}" />
 	</path>
 
 	<!-- external Ant tasks -->
@@ -56,34 +56,47 @@
 	<target name="init" description="Initialize">
 		<!-- Create the time stamp -->
 		<tstamp />
+		<!-- Create the build directory structure used by compile -->
+		<mkdir dir="${build-se}" />
+		<mkdir dir="${build-me}" />
 	</target>
 
 	<!-- compile -->
 	<target name="compile" depends="init" description="Compile the source">
-		<mkdir dir="${build-me}" />
-		<javac source="${source}"
-		       target="${target}"
+		<!-- Java SE -->
+		<javac srcdir="${src}"
+		       destdir="${build-se}"
+		       includes="ds/nfcip/tests/se/**"
+		       classpathref="se.classpath" />
+
+		<!-- Java ME -->
+		<javac source="1.3"
+		       target="1.1"
 		       srcdir="${src}"
 		       destdir="${build-me}"
 		       includes="ds/nfcip/tests/me/**"
-		       classpathref="all.classpath" />
+		       classpathref="me.classpath" />
 	</target>
 
 	<!-- dist -->
 	<target name="dist" depends="compile" description="Create the distribution">
 		<mkdir dir="${dist}" />
-		<!-- create the MIDlet Suite JAR file -->
-		<jar jarfile="${dist}/${ant.project.name}-${version}.jar"
+		<!-- Java SE -->
+		<jar jarfile="${dist}/${ant.project.name}-se-${version}.jar"
+		     basedir="${build-se}" />
+
+		<!-- Java ME -->
+		<jar jarfile="${dist}/${ant.project.name}-me-${version}.jar"
 		     basedir="${build-me}">
 			<manifest>
-				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="MIDlet-Version" value="${version}" />
-				<attribute name="MIDlet-Vendor" value="${midlet.vendor}" />
+				<attribute name="MIDlet-Vendor"
+				           value="Radboud University Nijmegen" />
 				<attribute name="MicroEdition-Configuration" value="CLDC-1.1" />
 				<attribute name="MicroEdition-Profile" value="MIDP-2.0" />
 				<attribute name="MIDlet-1"
-				           value="${midlet.name},,${midlet.class}" />
-				<attribute name="MIDlet-Name" value="${midlet.suitename}" />
+				           value="NFCIP Test,,ds.nfcip.tests.me.TestMIDlet" />
+				<attribute name="MIDlet-Name" value="NFCIP Test Suite" />
 				<attribute name="MIDlet-Permissions"
 				           value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write" />
 			</manifest>
@@ -99,9 +112,9 @@
 		          obfuscate="true"
 		          optimize="false"
 		          shrink="true">
-			<injar refid="injars.classpath" />
-			<libraryjar refid="compile.classpath" />
-			<outjar path="${dist}/${ant.project.name}-${version}-preverified.jar" />
+			<injar refid="me.app.lib" />
+			<libraryjar refid="me.phone.lib" />
+			<outjar path="${dist}/${ant.project.name}-me-${version}-preverified.jar" />
 			<keep access="public"
 			      type="class"
 			      name="*"
@@ -112,16 +125,16 @@
 	<!-- deploy -->
 	<target name="deploy"
 	        depends="preverify"
-	        description="Deploy the distribution">
+	        description="Deploy the MIDlet Suite">
 		<mkdir dir="${deployed}" />
 
 		<!-- copy the JAR file to deploy directory -->
-		<copy file="${dist}/${ant.project.name}-${version}-preverified.jar"
-		      tofile="${deployed}/${ant.project.name}-${version}.jar" />
+		<copy file="${dist}/${ant.project.name}-me-${version}-preverified.jar"
+		      tofile="${deployed}/${ant.project.name}-me-${version}.jar" />
 
 		<!-- create the JAD file -->
-		<jad jadfile="${deployed}/${ant.project.name}-${version}.jad"
-		     jarfile="${deployed}/${ant.project.name}-${version}.jar" />
+		<jad jadfile="${deployed}/${ant.project.name}-me-${version}.jad"
+		     jarfile="${deployed}/${ant.project.name}-me-${version}.jar" />
 	</target>
 
 	<!-- sign -->
@@ -130,13 +143,14 @@
 		      storepass="${storepass}"
 		      certpass="${certpass}"
 		      certalias="${certalias}"
-		      jarfile="${deployed}/${ant.project.name}-${version}.jar"
-		      jadfile="${deployed}/${ant.project.name}-${version}.jad" />
+		      jarfile="${deployed}/${ant.project.name}-me-${version}.jar"
+		      jadfile="${deployed}/${ant.project.name}-me-${version}.jad" />
 	</target>
 
 	<!-- clean -->
 	<target name="clean" description="Clean up">
 		<delete dir="${build-me}" />
+		<delete dir="${build-se}" />
 		<delete dir="${build}" />
 		<delete dir="${dist}" />
 		<delete dir="${deployed}" />

@@ -21,8 +21,7 @@ libraries required for the MIDlet to be built:
 After this you can compile the Java SE test application and the Java ME
 test MIDlet:
 
-	$ ant -f build-se.xml dist
-	$ ant -f build-me.xml deploy
+	$ ant deploy
 	
 This will create the test JAR file in the "dist" directory and the test
 MIDlet in the "deployed" directory.
