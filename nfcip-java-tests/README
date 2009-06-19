@@ -6,6 +6,12 @@
 
 Testing the NFCIP-JAVA library
 ==============================
+The tests use the nfcip-java library [1]. You need to download this library
+and the test software (nfcip-java-tests). See the Java SE and Java ME section 
+on how to run the tests.
+
+Building the Tests
+==================
 These test classes use the nfcip-java library [1]. It is automatically 
 downloaded by using the tools/download-libs.sh script as are all the 
 libraries required for the MIDlet to be built:
@@ -25,8 +31,10 @@ Java SE
 =======
 To run the Java SE test application one runs:
 
-	$ java -cp lib/nfcip-java-se.jar:dist/nfcip-java-se-test-VERSION.jar \
-		ds.nfcip.tests.se.TestApp --help
+	$ java -cp \ 
+        /path/to/nfcip-java-se-VERSION.jar:\
+        /path/to/nfcip-java-tests-se-VERSION.jar \
+            ds.nfcip.tests.se.TestApp --help
 		
 This will list for more information on the parameters available. One can use 
 "--list-readers" to find the attached readers, and use "--initiator" or 
@@ -36,8 +44,10 @@ Suppose one has two ACR122 readers attached to one computer, one can be set
 to initiator and one to target and run the tests to send byte arrays between 
 one another:
 
-	$ java -cp lib/nfcip-java-se.jar:dist/nfcip-java-se-test-VERSION.jar \
-       ds.nfcip.tests.TestApp -i -d 0 -m 100 -M 1000
+    $ java -cp \ 
+        /path/to/nfcip-java-se-VERSION.jar:\
+        /path/to/nfcip-java-tests-se-VERSION.jar \
+            ds.nfcip.tests.se.TestApp -i -d 0 -m 100 -M 1000
 
 This will set the first device (-d 0) to initiator mode (-i) and start with 
 sending 100 bytes, then expecting the same 100 bytes back from the target 
@@ -45,25 +55,29 @@ and then move on to 101 bytes, until 1000 is reached.
 
 For the target one would use:
 
-	$ java -cp lib/nfcip-java-se.jar:dist/nfcip-java-se-test-VERSION.jar \
-       ds.nfcip.tests.TestApp -t -d 1 -m 100 -M 1000
+    $ java -cp \ 
+        /path/to/nfcip-java-se-VERSION.jar:\
+        /path/to/nfcip-java-tests-se-VERSION.jar \
+            ds.nfcip.tests.se.TestApp -t -d 1 -m 100 -M 1000
 
-It is possible to enable various debugging levels to display an increasing 
-amount of details on the transfer. Without specifying anything only the result
-of the test is printed unless an error occurs. Use "--debug 1" to see progress 
-information. Increase the value to show more details up to including the raw 
-APDUs being sent to the ACR122.
+It is possible to enable various log levels (--log) to display an increasing 
+amount of details on the transfer. Without specifying anything (log level 0) 
+only the progress and result of the tests are printed unless an error occurs. 
+Increase the value to show more details up to including the raw APDUs being 
+sent to the ACR122.
 
 Java ME
 =======
-The MIDlet can be found in the "deployed" directory and can be installed on 
-the phone using Bluetooth file transfer for example. Or by using a memory 
-card. The MIDlet has a UI to configure settings that can also be configured
-by the command line tool. 
+The MIDlet can be found in the "deployed" directory (when compiling it 
+yourself) or as part of the nfcip-java-tests application. It can be installed 
+on the phone using Bluetooth file transfer for example. Or by using a memory 
+card. The MIDlet has a UI to configure settings that can also be configured by 
+the command line tool. 
 
-The MIDlet has also extensive debugging capabilities like the Java SE test
-application. The path for the log file is hard coded on the external memory
-card. The path can of course be changed by modifying the source code.
+The MIDlet has the same extensive logging capabilities like the Java SE test
+application. The path for the log file is hard coded and puts a file on the 
+external memory card. The path can of course be changed by modifying the source 
+code.
 
 In order for logging to work the MIDlet Suite needs permission to write to the 
 phone file system. This can be given by modifying the security parameters of 

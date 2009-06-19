@@ -12,8 +12,9 @@
 
 	<!-- set global properties for this build -->
 	<property name="src" location="src" />
-	<property name="build" location="buildme" />
-	<property name="dist" location="distme" />
+	<property name="build" location="build" />
+	<property name="build-me" location="build/me" />
+	<property name="dist" location="dist" />
 	<property name="deployed" location="deployed" />
 	<property name="lib" location="lib" />
 
@@ -59,11 +60,11 @@
 
 	<!-- compile -->
 	<target name="compile" depends="init" description="Compile the source">
-		<mkdir dir="${build}" />
+		<mkdir dir="${build-me}" />
 		<javac source="${source}"
 		       target="${target}"
 		       srcdir="${src}"
-		       destdir="${build}"
+		       destdir="${build-me}"
 		       includes="ds/nfcip/tests/me/**"
 		       classpathref="all.classpath" />
 	</target>
@@ -73,7 +74,7 @@
 		<mkdir dir="${dist}" />
 		<!-- create the MIDlet Suite JAR file -->
 		<jar jarfile="${dist}/${ant.project.name}-${version}.jar"
-		     basedir="${build}">
+		     basedir="${build-me}">
 			<manifest>
 				<attribute name="Built-By" value="${user.name}" />
 				<attribute name="MIDlet-Version" value="${version}" />
@@ -82,8 +83,7 @@
 				<attribute name="MicroEdition-Profile" value="MIDP-2.0" />
 				<attribute name="MIDlet-1"
 				           value="${midlet.name},,${midlet.class}" />
-				<attribute name="MIDlet-Name"
-				           value="${midlet.suitename}" />
+				<attribute name="MIDlet-Name" value="${midlet.suitename}" />
 				<attribute name="MIDlet-Permissions"
 				           value="javax.microedition.io.Connector.file.read, javax.microedition.io.Connector.file.write" />
 			</manifest>
@@ -136,9 +136,9 @@
 
 	<!-- clean -->
 	<target name="clean" description="Clean up">
+		<delete dir="${build-me}" />
 		<delete dir="${build}" />
 		<delete dir="${dist}" />
 		<delete dir="${deployed}" />
-		<delete dir="${doc}" />
 	</target>
 </project>
