@@ -5,6 +5,8 @@
 	  names for the new logging feature
     - revise the README file
     - update Ant files a bit
+    - merge Java SE and Java ME in one Ant file
+    - add make_release script
     
 1.2.0	(20090614)
 	General:
