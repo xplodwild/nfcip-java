@@ -5,11 +5,14 @@
 
 	<!-- set global properties for this build -->
 	<property name="src" location="src" />
-	<property name="build" location="build" />
-	<property name="buildme" location="buildme" />
+
+	<!-- we have diffent build directories because Java ME code is compiled 
+		 with different source and target parameters -->
+	<property name="build-se" location="build/se" />
+	<property name="build-me" location="build/me" />
 	<property name="dist" location="dist" />
 	<property name="lib" location="lib" />
-	<property name="doc" location="javadoc" />
+	<property name="doc" location="api" />
 
 	<!-- this file contains the locations of the required libraries -->
 	<property file="${lib}/lib.properties" />
@@ -25,17 +28,19 @@
 		<!-- Create the time stamp -->
 		<tstamp />
 		<!-- Create the build directory structure used by compile -->
-		<mkdir dir="${build}" />
-		<mkdir dir="${buildme}" />
+		<mkdir dir="${build-se}" />
+		<mkdir dir="${build-me}" />
 	</target>
 
 	<!-- compile -->
 	<target name="compile" depends="init" description="compile the source">
-		<javac srcdir="${src}" destdir="${build}" includes="ds/nfcip/se/**" />
+		<javac srcdir="${src}"
+		       destdir="${build-se}"
+		       includes="ds/nfcip/se/**" />
 		<javac srcdir="${src}"
 		       source="1.3"
 		       target="1.1"
-		       destdir="${buildme}"
+		       destdir="${build-me}"
 		       includes="ds/nfcip/me/**"
 		       classpathref="compile.classpath" />
 	</target>
@@ -46,26 +51,28 @@
 	        description="generate the distribution">
 		<mkdir dir="${dist}" />
 		<jar jarfile="${dist}/${ant.project.name}-se-${version}.jar"
-		     basedir="${build}" />
+		     basedir="${build-se}" />
 		<zip zipfile="${dist}/${ant.project.name}-me-${version}.jar"
-		     basedir="${buildme}" />
+		     basedir="${build-me}" />
 	</target>
 
 	<!-- doc -->
 	<target name="doc">
 		<mkdir dir="${doc}" />
 		<javadoc sourcepath="${src}"
-		         excludepackagenames="ds.nfcip.tests.*, ds.nfcipme.tests.*"
 		         access="protected"
 		         destdir="${doc}"
 		         classpathref="compile.classpath"
 		         failonerror="true" />
 	</target>
 
+	<!-- all -->
+	<target name="all" depends="dist, doc" />
+
 	<!-- clean -->
 	<target name="clean" description="clean up">
-		<delete dir="${build}" />
-		<delete dir="${buildme}" />
+		<delete dir="${build-se}" />
+		<delete dir="${build-me}" />
 		<delete dir="${dist}" />
 		<delete dir="${doc}" />
 	</target>
