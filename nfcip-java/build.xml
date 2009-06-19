@@ -8,6 +8,7 @@
 
 	<!-- we have diffent build directories because Java ME code is compiled 
 		 with different source and target parameters -->
+	<property name="build" location="build" />
 	<property name="build-se" location="build/se" />
 	<property name="build-me" location="build/me" />
 	<property name="dist" location="dist" />
@@ -73,6 +74,7 @@
 	<target name="clean" description="clean up">
 		<delete dir="${build-se}" />
 		<delete dir="${build-me}" />
+		<delete dir="${build}" />
 		<delete dir="${dist}" />
 		<delete dir="${doc}" />
 	</target>
