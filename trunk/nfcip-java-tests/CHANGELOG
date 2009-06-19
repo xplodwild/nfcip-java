@@ -3,7 +3,9 @@
 	- make it work again with new API of nfcip-java
 	- update MIDlet and TestApp to use "logging" instead of "debugging" as 
 	  names for the new logging feature
-
+    - revise the README file
+    - update Ant files a bit
+    
 1.2.0	(20090614)
 	General:
 	- put all external libraries in lib/lib.properties to put all version
