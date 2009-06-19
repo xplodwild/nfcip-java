@@ -1,4 +1,4 @@
-1.3.0	(?)
+1.3.0	(20090619)
 	General:
 	- make it work again with new API of nfcip-java
 	- update MIDlet and TestApp to use "logging" instead of "debugging" as 
