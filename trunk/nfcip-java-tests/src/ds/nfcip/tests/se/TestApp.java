@@ -42,6 +42,7 @@ public class TestApp {
 		int numberOfRuns = 1;
 		int logLevel = 0; /* we don't print anything by default */
 		int terminalNumber = -1;
+		boolean printTiming = false;
 
 		/* the card terminals */
 		List<CardTerminal> terminals;
@@ -86,6 +87,10 @@ public class TestApp {
 							.println("--log should be followed by an integer log level");
 					return;
 				}
+			}
+
+			if (args[i].equals("--time")) {
+				printTiming = true;
 			}
 
 			if (args[i].equals("--list-terminals") || args[i].equals("-l")) {
@@ -193,7 +198,7 @@ public class TestApp {
 			System.out.println("mode: " + NFCIPUtils.modeToString(testMode));
 			System.out.println("using minimum data length of " + minDataLength);
 			System.out.println("using maximum data length of " + maxDataLength);
-			t = new NFCIPTest(n, ps);
+			t = new NFCIPTest(n, ps, printTiming);
 			t.runTest(numberOfRuns, minDataLength, maxDataLength);
 			n.close();
 		} catch (NFCIPException e) {
@@ -222,6 +227,8 @@ public class TestApp {
 				.println("  --terminal i [-d i]        Specify the terminal to use, see --list-terminals");
 		System.out
 				.println("  --log i                    Log level, specify a number between 0 and 5");
+		System.out
+				.println("  --time                     Enable printing timing information for tests");
 		System.out
 				.println("  --runs i [-r i]            Number of runs of the test to perform");
 		System.out
