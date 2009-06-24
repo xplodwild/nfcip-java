@@ -40,30 +40,38 @@ public class NFCIPTest extends Thread {
 	 * Instantiate the NFCIPConnection Test Class
 	 * 
 	 * @param connection
-	 *            the NFCI
+	 *            the open NFCIPConnection
 	 * @param p
+	 * @param printTiming
+	 *            whether or not to print timing information of the performed
+	 *            tests
 	 */
-	public NFCIPTest(NFCIPInterface connection, PrintStream p) {
+	public NFCIPTest(NFCIPInterface connection, PrintStream p,
+			boolean printTiming) {
 		this.n = connection;
 		ps = p;
 	}
 
 	public void runTest(int numberOfRuns, int minDataLength, int maxDataLength)
 			throws NFCIPException {
-		Vector timingResults = new Vector();
-		long begin, end;
+		/* contains the results for the tests within one run */
+		Vector timingResultsTests = new Vector();
+
+		long testBegin, testEnd;
 		byte[] received;
-		printMessage("Starting test: numberOfRuns = " + numberOfRuns
+		printMessage("### Starting test: numberOfRuns = " + numberOfRuns
 				+ ", minDataLength = " + minDataLength + ", maxDataLength = "
 				+ maxDataLength);
-		for (int i = 0; i < numberOfRuns; i++) {
-			begin = System.currentTimeMillis();
-			for (int j = minDataLength; j <= maxDataLength; j++) {
+		for (int runNumber = 1; runNumber <= numberOfRuns; runNumber++) {
+			printMessage("### Starting run " + runNumber);
+			for (int testNumber = minDataLength; testNumber <= maxDataLength; testNumber++) {
+				testBegin = System.currentTimeMillis();
+
 				/*
 				 * initiator will send this data and verify response, target
 				 * will receive this data and verify response
 				 */
-				byte[] data = new byte[j];
+				byte[] data = new byte[testNumber];
 				for (int k = 0; k < data.length; k++)
 					data[k] = (byte) (255 - k);
 
@@ -74,12 +82,12 @@ public class NFCIPTest extends Thread {
 				 */
 				if (n.getMode() == NFCIPInterface.INITIATOR
 						|| n.getMode() == NFCIPInterface.FAKE_INITIATOR) {
-					printMessage("--> Sending  " + data.length + " bytes");
+					printMessage("### --> Sending  " + data.length + " bytes");
 					n.send(data);
 				}
 				received = n.receive();
 
-				printMessage("<-- Received " + received.length + " bytes");
+				printMessage("### <-- Received " + received.length + " bytes");
 
 				/*
 				 * we verify the received data with the data we expected (in
@@ -99,29 +107,35 @@ public class NFCIPTest extends Thread {
 				 */
 				if (n.getMode() == NFCIPInterface.TARGET
 						|| n.getMode() == NFCIPInterface.FAKE_TARGET) {
-					printMessage("--> Sending  " + data.length + " bytes");
+					printMessage("### --> Sending  " + data.length + " bytes");
 					n.send(received);
 				}
+				testEnd = System.currentTimeMillis();
+				Measurement m = new Measurement(runNumber, testEnd - testBegin,
+						n.getNumberOfResets());
+				timingResultsTests.addElement(m);
 			}
-			end = System.currentTimeMillis();
-			timingResults.addElement(new Long(end - begin));
 		}
-		printMessage("=== END OF TEST ===");
-		printMessage("#messages sent     = " + n.getNumberOfSentMessages());
-		printMessage("#messages received = " + n.getNumberOfReceivedMessages());
-		printMessage("#blocks sent       = " + n.getNumberOfSentBlocks());
-		printMessage("#blocks received   = " + n.getNumberOfReceivedBlocks());
-		printMessage("#bytes sent        = " + n.getNumberOfSentBytes());
-		printMessage("#bytes received    = " + n.getNumberOfReceivedBytes());
-		printMessage("#resets            = " + n.getNumberOfResets());
+		printMessage("### === END OF TEST ===");
+		printMessage("### #messages sent     = " + n.getNumberOfSentMessages());
+		printMessage("### #messages received = "
+				+ n.getNumberOfReceivedMessages());
+		printMessage("### #blocks sent       = " + n.getNumberOfSentBlocks());
+		printMessage("### #blocks received   = "
+				+ n.getNumberOfReceivedBlocks());
+		printMessage("### #bytes sent        = " + n.getNumberOfSentBytes());
+		printMessage("### #bytes received    = " + n.getNumberOfReceivedBytes());
+		printMessage("### #resets            = " + n.getNumberOfResets());
 
 		float packetLoss = (float) n.getNumberOfResets()
 				/ (n.getNumberOfSentMessages() + n
 						.getNumberOfReceivedMessages()) * 100;
-		printMessage("packet loss        = " + packetLoss + "%");
-		printMessage("run #\ttime(ms)");
-		for (int i = 1; i <= numberOfRuns; i++) {
-			printMessage(i + "\t" + timingResults.elementAt(i - 1));
+		printMessage("### packet loss        = " + packetLoss + "%");
+		printMessage("### \trun\ttime(ms)\t#numberOfResets");
+		for (int i = 0; i < timingResultsTests.size(); i++) {
+			Measurement m = (Measurement) timingResultsTests.elementAt(i);
+			printMessage("\t" + m.runNumber + "\t" + m.elapsedTime + "\t\t"
+					+ m.numberOfResets);
 		}
 	}
 
@@ -129,4 +143,17 @@ public class NFCIPTest extends Thread {
 		if (ps != null)
 			ps.println(m);
 	}
+
+	private class Measurement {
+		public int runNumber;
+		public long elapsedTime;
+		public int numberOfResets;
+
+		public Measurement(int run, long time, int resets) {
+			runNumber = run;
+			elapsedTime = time;
+			numberOfResets = resets;
+		}
+	}
+
 }

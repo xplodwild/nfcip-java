@@ -195,7 +195,7 @@ public class TestMIDlet extends MIDlet implements Runnable, CommandListener {
 			m.setLogging(printStream, logLevel);
 			m.setMode(mode);
 			statusField.setString("Running...");
-			NFCIPTest t = new NFCIPTest(m, printStream);
+			NFCIPTest t = new NFCIPTest(m, printStream, false);
 			t.runTest(numberOfRuns, minDataLength, maxDataLength);
 			statusField.setString("Finished! (#resets = "
 					+ m.getNumberOfResets() + ")");
