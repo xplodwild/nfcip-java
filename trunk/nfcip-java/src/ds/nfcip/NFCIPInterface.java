@@ -143,4 +143,35 @@ public interface NFCIPInterface {
 	 * @return the number of received bytes
 	 */
 	public abstract int getNumberOfReceivedBytes();
+
+	/**
+	 * Set the logging value and stream.
+	 * 
+	 * @param ps
+	 *            the stream to write the log to
+	 * @param logLevel
+	 *            the level
+	 */
+	public abstract void setLogging(PrintStream ps, int logLevel)
+			throws NFCIPException;
+
+	/**
+	 * Set the mode of the connection.
+	 * 
+	 * @param mode
+	 *            the mode
+	 * @throws NFCIPException
+	 *             if setting the mode failed
+	 */
+	public abstract void setMode(int mode) throws NFCIPException;
+
+	/**
+	 * Set the terminal number to use.
+	 * 
+	 * @param terminalNumber
+	 *            the terminal number
+	 * @throws NFCIPException
+	 *             if setting the terminal failed
+	 */
+	public abstract void setTerminal(int terminalNumber) throws NFCIPException;
 }
