@@ -1,0 +1,8 @@
+MIDlet-Vendor: Radboud University Nijmegen
+MIDlet-Version: 1.0.0
+MicroEdition-Configuration: CLDC-1.1
+MicroEdition-Profile: MIDP-2.0
+MIDlet-1: SPMIDlet Test,suite_icon.png,ds.sptest.SPMIDlet
+MIDlet-2: SPMIDlet OV2,suite_icon.png,ds.ov2.SPMIDlet
+MIDlet-Name: Security Protocols MIDlet Suite
+
