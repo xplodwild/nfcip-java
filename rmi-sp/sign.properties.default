@@ -1,0 +1,10 @@
+# Copy this file to "sign.properties" and modify the
+# values below. This is only required if you want to
+# sign the MIDlet Suite
+# 
+# You can sign the MIDlet Suite using "ant sign"
+
+keystore=${user.home}/.keystore
+keystorepass=password
+keyentryalias=alias
+keypass=password

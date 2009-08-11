@@ -1,0 +1,257 @@
+SecurityProtocolGenenerator
+===========================
+
+**************
+See GETTING_STARTED on how to run the code in this project
+**************
+
+This RMI system works very simple, we implemented this because the Nokia  
+6131 NFC doesn't have any support for RMI, and the RMI implementation for 
+JavaCard is not acceptable for us. The APDU size is too limited as we want to 
+use lots of method arguments and abstract this all away.
+
+Components:
+- Interface(s) (describing protocol steps)
+- RMIServer
+- RMIClient
+- Server
+- Client
+
+The interface is a normal Java interface that lists the steps the protocol 
+consists of. So for example like this:
+
+================================================================
+package ds.project;
+
+public interface Encryption {
+  public void setKey(byte[] key) throws RMIException;
+  public void setData(byte[] data) throws RMIException;
+  public void encrypt() throws RMIException;
+  public byte[] getResult() throws RMIException;
+}
+================================================================
+
+The interface files together with the RMIException file (and the Util class) 
+need to be available and compiled! in the package for which the stubs are  
+going to be generated (layout). Eclipse takes care of all this by itself. 
+Compare it to how the tests package is configured (see below)
+
+	src/ds/project
+		Encryption.java  		(the interface)	
+		RMIException.java
+		Util.java
+
+The packages need to be defined in the files themselves, if applicable. Now 
+you can run SPGen. It's most convenient from Eclipse where you create a "Run 
+Configuration" for SPGenMain to include the arguments: 
+
+	ds.project "Encryption"
+					
+To generate the stubs for the "Encryption" interface. The stub generator will 
+use the interface(s) to create a RMIServer and RMIClient to take care of the 
+communication between the server and the client, you can specify multiple 
+interfaces separated by a space, e.g.:
+ 
+	ds.project "Encryption Decryption Tests"
+	
+         client                                           server
+-------------------------                       -------------------------
+| Client <--> RMIClient | <-- communication --> | RMIServer <--> Server |
+-------------------------                       -------------------------
+
+You have to implement the Client and Server code yourself, but this is easy 
+as it is nothing more than using the interfaces defined above. For the client 
+this means that you call the methods defined by the interface to get the job 
+done and for the server this means that you implement the methods defined by 
+the interface. 
+
+We assume that the communication channel exists, and can be used to send 
+"unlimited" sizes byte arrays. For communicating with NFC phones nfcip-java 
+can be used for example [1]. For communication over Bluetooth it is possible 
+to create something similar.
+
+In case you have multiple protocols you can define multiple interfaces, these 
+will all be integrated into the RMI stubs. 
+
+[ * NOTE * ]  The methods should be called by the client in the order they
+              are defined in the interface, deviating from this will result
+              in an exception! Also switching protocols (interfaces) mid way
+              is not possible! This is a design decision that makes sense 
+              for security protocols!
+
+In the tests package some examples can be found of implementing a server and a 
+client. The main point here is that the client creates an instance of 
+RMIClient and calls the defined methods:
+
+================================================================
+public class Client {
+	private RMIClient r;
+	private byte[] key = { (byte) 0xaa, (byte) 0xbb, (byte)0xcc };
+
+	Client() {
+		r = new RMIClient();
+	}
+	
+	public performEncryption() {
+		try {
+			r.setKey(key);
+			...
+			...
+			...
+			
+		}catch (RMIException e) {
+    		e.printStackTrace();
+		}
+	}
+	
+	....
+	....
+	....
+	
+}
+================================================================
+
+The server has to implement all the methods in the interface(s) and extend the 
+class RMIServer:
+
+================================================================
+public class Server implements Encryption extends RMIServer {
+  
+  Server() {
+  	super();
+  }
+  
+  public void setKey(byte[] key) {
+  	// do something
+  }
+  
+  public void setData(byte[] data) {
+  	// do something
+  }
+  
+  public void encrypt() {
+    // do something
+  }
+  
+  public byte[] getResult() {
+  	// do something
+  }
+}
+================================================================
+
+That's all. In case multiple protocols (interfaces) are used all of them need 
+to be implemented although technically this is not necessary as the RMIServer 
+defines them as "abstract" so they need to be overridden by the Server class
+anyway so there will be an error message about this.
+
+Running the tests
+-----------------
+Included is a test set that runs tests on the RMI system by using the Java SE 
+implementation of the server. If you open the project in Eclipse it's rather 
+easy to get started. For now the RMIExceptions.java and Util.java class are 
+not copied/generated by the stub generator so the need to be "manually" copied 
+this can be done using Eclipse (right click them and select Copy, move to the 
+"tests" package and paste them there. The package should be automatically 
+added. 
+
+Now run "SPGenMain" from Eclipse, you have to set the command line 
+parameters using "Run configurations". At this time the parameters would be 
+
+	ds.spgen.tests "ByteArrayInterface PingInterface ShortInterface 
+				    BigIntegerInterface"
+	
+Where "ds.spgen.tests" is the package and the rest are the interfaces. This 
+will generate RMIServer and RMIClient in the tests package which will then be 
+used by the Server and Client already there. There is also an NFCRMIClient 
+class that can be used for connecting to a NFC phone (using nfcip-java). This 
+would just involve changing one line in Client.java (as is already there 
+commented).
+
+Now you should be able to run "Client" which would perform the tests and shows 
+you something like:
+
+TEST [pingMethod] SUCCESS
+TEST [sendBA] SUCCESS
+TEST [receiveBA] SUCCESS
+TEST [sendReceiveBA] SUCCESS
+TEST [sendTwoReceiveBA] SUCCESS
+TEST [addTwoByteArrays] SUCCESS
+TEST [setSomeShorts] SUCCESS
+TEST [addSomeShorts] SUCCESS
+TEST [multiplySomeShorts] SUCCESS
+TEST [modPow] SUCCESS
+
+Your own project
+----------------
+It's easy to create your own protocols by creating a package inside SPGen and 
+copying your interfaces and Util.java and RMIException.java from the ds.spgen
+package to your own (Eclipse will modify the package line when you copy them
+using Eclipse).
+
+So the layout in the Package Explorer looks like this:
+
+spgen
+  src
+    ds.spgen				<-- the SPGen classes
+		SPGenMain.java		<-- the Main class 	
+		...
+		...
+    ds.spgen.tests			<-- the test security protocol
+    your.project.package	<-- your own protocol
+    	MyInterface1.java
+    	MyInterface2.java
+    	Util.java
+    	RMIException.java
+
+When this is your setup in Eclipse you can run SPGenMain with the package name 
+and the interfaces like this:
+
+	your.project.package "MyInterface1 MyInterface2"
+	
+This will create the files RMIServer and RMIClient (and possibly 
+NFCRMIClient and BTRMIClient as well for use with NFC and Bluetooth).
+
+Data communication format
+-------------------------
+The data being sent and received is nothing more than a byte array with the 
+(serialized) data and a header. The header contains the protocol number, the 
+step number and the number of parameters.
+
+Format (B = byte, S = short):
+
+<B protocol number> <B protocol step> <B number of parameters> 
+    <S length of param_1> ... <S length of param_n>
+	<param_1> ... <param_n>
+
+Examples:
+0x06 0x0F 0x00		
+	(protocol 6, step 15, no parameters)
+
+0x05 0x0A 0x01 0x00 0x08 0x00 0x01 0x02 0x03 0x04 0x05 0x06 0x07
+	(protocol 5, step 10, 1 parameter (which happens to be a byte array of 
+	 size 00 08 (8 bytes))  
+
+Stub generator inner workings
+-----------------------------
+1] load the interfaces specified on the command line using the Java Reflection.
+2] extract all the methods and parameter (return) types
+3] load all this information in ProtocolSuite (and contained objects)
+4] generate "base" server and client classes (stuff that is platform specific 
+   like array copy is written as a macro (ARRAY_COPY))
+5] modify the base classes and create specific ones for Java SE, Java Card and
+   Java ME.
+6] write them all to their respective files
+
+
+Padlock Icon
+------------
+Author :	Eoin McGrath | Starfish Web Consulting
+HomePage :	http://www.starfishwebconsulting.co.uk
+License :	Released under GNU Lesser General Public License (LGPL) readme.txt
+
+http://www.veryicon.com/icons/business/free-ecommerce/padlock.html
+
+References
+----------
+
+[1] http://nfcip-java.googlecode.com

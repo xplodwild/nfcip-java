@@ -1,0 +1,57 @@
+How to get started
+------------------
+
+Requirements:
+- Java 6 (OpenJDK is fine)
+- Ant
+
+# download and extract all the required libraries:
+
+  $ sh tools/download-libs.sh
+
+# compile the security protocol generator and generate the
+# protocol stubs
+
+  $ ant compile
+
+# compile the MIDlet suite (for Java ME)
+
+  $ ant -f build-me.xml deploy
+
+# run the "local" test (not using any communication channel)
+
+  $ java -cp lib/bcprov-jdk16.jar:lib/nfcip-java-se.jar:build \
+      ds.sp.RunSP --local --protocol ds.sptest 
+
+    Loading class ds.sptest.Client
+    TEST [pingMethod] SUCCESS
+    TEST [sendBA] SUCCESS
+    TEST [receiveBA] SUCCESS
+    TEST [sendReceiveBA] SUCCESS
+    TEST [sendTwoReceiveBA] SUCCESS
+    TEST [addTwoByteArrays] SUCCESS
+    TEST [setSomeShorts] SUCCESS
+    TEST [addSomeShorts] SUCCESS
+    TEST [multiplySomeShorts] SUCCESS
+    TEST [modPow] SUCCESS
+    TEST [arrayTest] SUCCESS
+    TEST [arrayParameterTest] SUCCESS
+    Closing connection...
+  $
+
+# run the "remote" test by talking to the MIDlet suite over
+# NFC
+
+  $ java -cp lib/bcprov-jdk16.jar:lib/nfcip-java-se.jar:build \
+      ds.sp.RunSP --nfc --client --reader 0 --protocol ds.sptest
+
+    Loading class ds.sptest.Client
+    TEST [pingMethod] SUCCESS
+    TEST [sendBA] SUCCESS
+    [...]
+    TEST [arrayParameterTest] SUCCESS
+    Closing connection...
+  $
+
+Another protocol you can try is "ds.ov2" (--protocol ds.ov2)
+

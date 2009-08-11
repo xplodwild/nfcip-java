@@ -1,0 +1,140 @@
+<?xml version="1.0"?>
+<project name="SPMIDlet" default="compile" basedir=".">
+	<description>SPMIDlet Suite</description>
+
+	<property name="version" value="1.0.0" />
+
+	<!-- set global properties for this build -->
+	<property name="src" location="src" />
+	<property name="protocols" location="protocols" />
+	<property name="resources" location="res" />
+	<property name="build" location="build-me" />
+	<property name="dist" location="dist-me" />
+	<property name="deployed" location="deployed-me" />
+	<property name="lib" location="lib" />
+	<property name="manifest" location="Application Descriptor" />
+
+	<!-- this file contains the locations of the required libraries -->
+	<property file="${lib}/lib.properties" />
+
+	<!-- this file contains properties required for signing the MIDlet 
+	     Suite -->
+	<property file="sign.properties" />
+
+	<!-- use this as the boot classpath for Java ME -->
+	<path id="me.boot.lib">
+		<pathelement location="${cldc.jar}" />
+		<pathelement location="${midp.jar}" />
+	</path>
+
+	<!-- these are the libraries that are just needed for compilation as the 
+	     phone has implementations of those -->
+	<path id="me.phone.lib">
+		<pathelement location="${jsr-135.jar}" />
+		<pathelement location="${jsr-120.jar}" />
+		<pathelement location="${jsr-82.jar}" />
+		<pathelement location="${jsr-75.jar}" />
+		<pathelement location="${nokia-ui.jar}" />
+		<pathelement location="${siemens-ui.jar}" />
+		<pathelement location="${jsr-257-nokia.jar}" />
+	</path>
+
+	<!-- these are the libraries that actually need to be included in the 
+             MIDlet Suite, the phone does not have implementations of these -->
+	<path id="me.app.lib">
+		<pathelement location="${bouncy-me.jar}" />
+		<pathelement location="${nfcip-java-me.jar}" />
+	</path>
+
+	<!-- this is used for compiling, we need all libraries here -->
+	<path id="me.classpath">
+		<path refid="me.phone.lib" />
+		<path refid="me.app.lib" />
+	</path>
+
+	<!-- external Ant tasks -->
+	<taskdef resource="proguard/ant/task.properties"
+	         classpath="${proguard.jar}" />
+	<taskdef resource="task.properties" classpath="${jad-ant-tasks.jar}" />
+
+	<!-- init -->
+	<target name="init" description="Initialize">
+		<tstamp />
+		<mkdir dir="${build}" />
+	</target>
+
+	<!-- compile -->
+	<target name="compile" depends="init" description="Compile the source">
+		<javac source="1.4"
+		       destdir="${build}"
+		       includes="ds/sptest/SPMIDlet.java ds/ov2/SPMIDlet.java"
+		       bootclasspathref="me.boot.lib"
+		       classpathref="me.classpath">
+			<src path="${src}" />
+			<src path="${protocols}" />
+		</javac>
+	</target>
+
+	<!-- dist -->
+	<target name="dist" depends="compile" description="Create the distribution">
+		<mkdir dir="${dist}" />
+		<jar jarfile="${dist}/${ant.project.name}-${version}.jar"
+		     manifest="${manifest}">
+			<fileset dir="${build}" />
+			<fileset dir="${resources}" />
+		</jar>
+	</target>
+
+	<!-- preverify -->
+	<target name="preverify"
+	        depends="dist"
+	        description="Preverify the code for Java ME">
+		<!-- use ProGuard to preverify the Java Classes for Java ME -->
+		<proguard microedition="true"
+		          obfuscate="true"
+		          optimize="false"
+		          shrink="true">
+			<injar refid="me.app.lib" />
+			<injar path="${dist}/${ant.project.name}-${version}.jar" />
+			<libraryjar refid="me.boot.lib" />
+			<libraryjar refid="me.phone.lib" />
+			<outjar path="${dist}/${ant.project.name}-${version}-preverified.jar" />
+			<keep access="public"
+			      type="class"
+			      name="*"
+			      extends="javax.microedition.midlet.MIDlet" />
+		</proguard>
+	</target>
+
+	<!-- deploy -->
+	<target name="deploy"
+	        depends="preverify"
+	        description="Deploy the MIDlet Suite">
+		<mkdir dir="${deployed}" />
+
+		<!-- copy the preverified JAR to deploy directory -->
+		<copy file="${dist}/${ant.project.name}-${version}-preverified.jar"
+		      tofile="${deployed}/${ant.project.name}-${version}.jar" />
+
+		<!-- create the application descriptor -->
+		<jad jadfile="${deployed}/${ant.project.name}-${version}.jad"
+		     jarfile="${deployed}/${ant.project.name}-${version}.jar" />
+	</target>
+
+	<!-- sign -->
+	<target name="sign" depends="deploy" description="Sign the MIDlet Suite">
+		<sign keystore="${keystore}"
+		      keystorepass="${keystorepass}"
+		      keypass="${keypass}"
+		      keyentryalias="${keyentryalias}"
+		      jar="${deployed}/${ant.project.name}-${version}.jar"
+		      jad="${deployed}/${ant.project.name}-${version}.jad" />
+	</target>
+
+	<!-- clean -->
+	<target name="clean" description="Clean up">
+		<delete dir="${build}" />
+		<delete dir="${dist}" />
+		<delete dir="${deployed}" />
+	</target>
+</project>
