@@ -104,4 +104,8 @@ public class NFCIPConnection extends NFCIPAbstract implements NFCIPInterface {
 			throw new NFCIPException("native receive error: " + e.toString());
 		}
 	}
+
+	public void setTerminal(int terminalNumber) throws NFCIPException {
+		// N/A
+	}
 }
