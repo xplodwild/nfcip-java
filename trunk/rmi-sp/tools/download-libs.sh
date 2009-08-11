@@ -7,7 +7,7 @@ MICROEMU=2.0.3
 PROGUARD=4.4
 
 # JAD Ant Tasks (JAT)
-JAT=1.1
+JAT=1.3
 
 # nfcip-java
 NFCIP_JAVA=1.3.1

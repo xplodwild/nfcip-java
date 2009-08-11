@@ -117,8 +117,8 @@
 		      tofile="${deployed}/${ant.project.name}-${version}.jar" />
 
 		<!-- create the application descriptor -->
-		<jad jadfile="${deployed}/${ant.project.name}-${version}.jad"
-		     jarfile="${deployed}/${ant.project.name}-${version}.jar" />
+		<jad jad="${deployed}/${ant.project.name}-${version}.jad"
+		     jar="${deployed}/${ant.project.name}-${version}.jar" />
 	</target>
 
 	<!-- sign -->
