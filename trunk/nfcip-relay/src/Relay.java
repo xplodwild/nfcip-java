@@ -1,3 +1,23 @@
+/*
+ * Relay - Class that implements relaying and replaying of NFCIP communication
+ *                     
+ * Copyright (C) 2009  François Kooman <fkooman@tuxed.net>
+ *
+ * This program is free software; you can redistribute it and/or
+ * modify it under the terms of the GNU General Public License
+ * as published by the Free Software Foundation; either version 2
+ * of the License, or (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with this program; if not, write to the Free Software
+ * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+ */
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -63,30 +83,33 @@ public class Relay extends Thread {
 				/* we only need 1 reader! */
 				relay_initiator = connectToTerminal(setTerminal(0));
 
-				ps.println(Utils.byteArrayToString(trace.get(0)));
-				transmit(relay_initiator, IN_JUMP_FOR_DEP, trace.get(0), null);
-				ps.println(Utils.byteArrayToString(trace.get(1)));
-				transmit(relay_initiator, SET_PARAMETERS, trace.get(1), null);
+				ps.println(Utils.byteArrayToString(trace.getItoT(0)));
+				transmit(relay_initiator, IN_JUMP_FOR_DEP, trace.getItoT(0),
+						null);
+				ps.println(Utils.byteArrayToString(trace.getItoT(1)));
+				transmit(relay_initiator, SET_PARAMETERS, trace.getItoT(1),
+						null);
 				int ti = 2;
 				while (ti < trace.size()) {
 					/*
 					 * FIXME: we should store the MI byte in the trace as well
 					 * so we can use it here again!
 					 */
-					byte[] dx = trace.get(ti);
-//					if(ti==9) { 
-//						/* replace mac of phone with mac of PC and see if it works @ position 36 */
-//						/* 00:1E:37:BA:7C:8C */
-//						dx[36] = (byte)0x00;
-//						dx[37] = (byte)0x1e;
-//						dx[38] = (byte)0x37;
-//						dx[39] = (byte)0xba;
-//						dx[40] = (byte)0x7c;
-//						dx[41] = (byte)0x8c;
-//					}
+					byte[] dx = trace.getItoT(ti);
+					// if(ti==9) {
+					// /* replace mac of phone with mac of PC and see if it
+					// works @ position 36 */
+					// /* 00:1E:37:BA:7C:8C */
+					// dx[36] = (byte)0x00;
+					// dx[37] = (byte)0x1e;
+					// dx[38] = (byte)0x37;
+					// dx[39] = (byte)0xba;
+					// dx[40] = (byte)0x7c;
+					// dx[41] = (byte)0x8c;
+					// }
 					ps.println(Utils.byteArrayToString(dx));
-					transmit(relay_initiator, IN_DATA_EXCHANGE, trace.get(ti++),
-							new byte[2]);
+					transmit(relay_initiator, IN_DATA_EXCHANGE, trace
+							.getItoT(ti++), new byte[2]);
 				}
 			} else {
 				/* make initiator the same device as in replay case above */
@@ -98,9 +121,11 @@ public class Relay extends Thread {
 				 * relay traffic for. We store the information we got from the
 				 * initiator
 				 */
+				trace.addTtoI(targetPayload);
 				byte[] response = transmit(relay_target, TG_INIT_AS_TARGET,
 						targetPayload, null);
-
+				/* log dummy, target does not have SET_PARAMETERS */
+				trace.addTtoI(new byte[0]);
 				/* Determine the mode */
 				ps.println("*** Initiated By Initiator ***");
 				ps.print("Mode                          : ");
@@ -200,7 +225,7 @@ public class Relay extends Thread {
 						Utils.appendToByteArray(nfcid3i, generalBytes));
 
 				// ps.println(Utils.byteArrayToString(initiatorPayload));
-				trace.add(initiatorPayload);
+				trace.addItoT(initiatorPayload);
 				transmit(relay_initiator, IN_JUMP_FOR_DEP, initiatorPayload,
 						null);
 				/* Now we may, or may not need to set the NAD/DID usage */
@@ -209,7 +234,7 @@ public class Relay extends Thread {
 
 				// ps.println("SET_PARAMETERS: " + Utils.byteToString(param));
 
-				trace.add(new byte[] { param });
+				trace.addItoT(new byte[] { param });
 				transmit(relay_initiator, SET_PARAMETERS, new byte[] { param },
 						null);
 
@@ -228,9 +253,10 @@ public class Relay extends Thread {
 							statusByte[1] = 0x01; /* tell transmit to add MI bit */
 						else
 							statusByte[1] = 0x00;
-						trace.add(data);
+						trace.addItoT(data);
 						data2 = transmit(relay_initiator, IN_DATA_EXCHANGE,
 								data, statusByte);
+						trace.addTtoI(data2);
 					} while (mi);
 					do {
 						ps.println("Relaying T->I: "
