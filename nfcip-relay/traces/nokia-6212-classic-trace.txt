@@ -1,0 +1,36 @@
+Nokia 6212 Classic <--> Nokia 6212 Classic relaying of data between the two 
+phones using NFCIP to successively initiate file transfer over BlueTooth.
+
+I->T	means data from the initiating phone (the one sending the file)
+T->I	means data from the target phone (the one receiving the file)
+
+The data displayed is the raw byte array data (i.e.: 1620 means 0x16, 0x20)
+
+*** Initiated By Initiator ***
+Mode                          : ACTIVE, DEP, NO PICC, 106kbps
+NFCID3i                       : 12121212121212121212
+DIDi (Device ID Initiator)    : 1
+BSi  (Send Speed Initiator)   : 0
+BRi  (Receive Speed Initiator): 0
+PPi  (Protocol Parameters)    : NO NAD, NO General Bytes??
+Gi   (General Bytes)          : 46666d1000
+
+Relaying I->T: 1620
+Relaying T->I: 1630
+Relaying I->T: c285
+Relaying T->I: 8285
+Relaying I->T: 15e00091020a487210d102046163010131005c0d16016e6f6b69612e636f6d3a7368653101c0134e6f6b6961203632313220636c617373696300
+Relaying T->I: 15f00091020a487210d102046163010131005c0d16016e6f6b69612e636f6d3a736865310140134e6f6b6961203632313220636c617373696300
+Relaying I->T: c18501
+Relaying T->I: 818501
+Relaying I->T: c1c51091020a487310d102046163010131005c0d16016e6f6b69612e636f6d3a7368653101c0134e6f6b6961203632313220636c617373696300
+Relaying T->I: 81c51091020a487310d102046163010131005c0d16016e6f6b69612e636f6d3a736865310140134e6f6b6961203632313220636c617373696300
+Relaying I->T: 15a001
+Relaying T->I: 15b001
+Relaying I->T: 15e01191020a487210d102046163010131005c0c2e016e6f6b69612e636f6d3a6274310000226566eb815a020400000000000000000000000000000000134e6f6b6961203632313220636c617373696300
+Relaying T->I: 818502
+Relaying I->T: 0040
+Relaying T->I: 81c52191020a487310d102046163010131005c0c2e016e6f6b69612e636f6d3a6274310000226566eea65a020400000000000000000000000000000000134e6f6b6961203632313220636c617373696300
+Relaying I->T: 15a002
+Relaying T->I: 0040
+
