@@ -97,20 +97,23 @@ public class Relay extends Thread {
 					 * FIXME: we should store the MI byte in the trace as well
 					 * so we can use it here again!
 					 */
-					byte[] dx = trace.getItoT(ti++);
-					// if(ti==9) {
-					// /* replace mac of phone with mac of PC and see if it
-					// works @ position 36 */
-					// /* 00:1E:37:BA:7C:8C */
-					// dx[36] = (byte)0x00;
-					// dx[37] = (byte)0x1e;
-					// dx[38] = (byte)0x37;
-					// dx[39] = (byte)0xba;
-					// dx[40] = (byte)0x7c;
-					// dx[41] = (byte)0x8c;
-					// }
+					byte[] dx = trace.getItoT(ti);
+//					if (ti == 8) {
+//						/*
+//						 * replace mac of phone with mac of PC and see if it
+//						 * works @ position 36
+//						 */
+//						/* 00:1E:37:BA:7C:8C */
+//						dx[36] = (byte) 0x00;
+//						dx[37] = (byte) 0x1e;
+//						dx[38] = (byte) 0x37;
+//						dx[39] = (byte) 0xba;
+//						dx[40] = (byte) 0x7c;
+//						dx[41] = (byte) 0x8c;
+//					}
 					ps.println(Utils.byteArrayToString(dx));
 					transmit(relay_initiator, IN_DATA_EXCHANGE, dx, new byte[2]);
+					ti++;
 				}
 			} else if (replay && !replayInitiator) {
 				/* we want to replay the target */
@@ -125,16 +128,31 @@ public class Relay extends Thread {
 				while (ti < trace.sizeTtoI()) {
 					/* data get, we don't even look at the response */
 					transmit(relay_target, TG_GET_DATA, null, new byte[2]);
-					
+
 					/*
 					 * FIXME: we should store the MI byte in the trace as well
 					 * so we can use it here again to use TG_SET_META_DATA
 					 * instead!
 					 */
-					byte[] dx = trace.getTtoI(ti++);
-					//ps.println(Utils.byteArrayToString(dx));
-					ps.println(Utils.hexDump(dx));
+					byte[] dx = trace.getTtoI(ti);
+
+//					if (ti == 9) {
+//						/*
+//						 * replace mac of phone with mac of PC and see if it
+//						 * works @ position 36
+//						 */
+//						/* 00:1E:37:BA:7C:8C */
+//						dx[36] = (byte) 0x00;
+//						dx[37] = (byte) 0x1e;
+//						dx[38] = (byte) 0x37;
+//						dx[39] = (byte) 0xba;
+//						dx[40] = (byte) 0x7c;
+//						dx[41] = (byte) 0x8c;
+//					}
+					ps.println(Utils.byteArrayToString(dx));
+					// ps.println(Utils.hexDump(dx));
 					transmit(relay_target, TG_SET_DATA, dx, new byte[2]);
+					ti++;
 				}
 			} else {
 				/* make initiator the same device as in replay case above */
