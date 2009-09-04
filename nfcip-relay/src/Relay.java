@@ -70,16 +70,18 @@ public class Relay extends Thread {
 
 	private Trace trace;
 	private boolean replay;
+	private boolean replayInitiator;
 
 	public Relay() {
 		ps = System.out;
 		replay = false;
 		trace = new Trace();
+		replayInitiator = true;
 	}
 
 	public void run() {
 		try {
-			if (replay) {
+			if (replay && replayInitiator) {
 				/* we only need 1 reader! */
 				relay_initiator = connectToTerminal(setTerminal(0));
 
@@ -90,12 +92,12 @@ public class Relay extends Thread {
 				transmit(relay_initiator, SET_PARAMETERS, trace.getItoT(1),
 						null);
 				int ti = 2;
-				while (ti < trace.size()) {
+				while (ti < trace.sizeItoT()) {
 					/*
 					 * FIXME: we should store the MI byte in the trace as well
 					 * so we can use it here again!
 					 */
-					byte[] dx = trace.getItoT(ti);
+					byte[] dx = trace.getItoT(ti++);
 					// if(ti==9) {
 					// /* replace mac of phone with mac of PC and see if it
 					// works @ position 36 */
@@ -108,8 +110,31 @@ public class Relay extends Thread {
 					// dx[41] = (byte)0x8c;
 					// }
 					ps.println(Utils.byteArrayToString(dx));
-					transmit(relay_initiator, IN_DATA_EXCHANGE, trace
-							.getItoT(ti++), new byte[2]);
+					transmit(relay_initiator, IN_DATA_EXCHANGE, dx, new byte[2]);
+				}
+			} else if (replay && !replayInitiator) {
+				/* we want to replay the target */
+				ps.println("Replaying TARGET");
+				/* we only need 1 reader, but we use the same one as before... */
+				relay_target = connectToTerminal(setTerminal(1));
+
+				ps.println(Utils.byteArrayToString(trace.getTtoI(0)));
+				transmit(relay_target, TG_INIT_AS_TARGET, trace.getTtoI(0),
+						null);
+				int ti = 2;
+				while (ti < trace.sizeTtoI()) {
+					/* data get, we don't even look at the response */
+					transmit(relay_target, TG_GET_DATA, null, new byte[2]);
+					
+					/*
+					 * FIXME: we should store the MI byte in the trace as well
+					 * so we can use it here again to use TG_SET_META_DATA
+					 * instead!
+					 */
+					byte[] dx = trace.getTtoI(ti++);
+					//ps.println(Utils.byteArrayToString(dx));
+					ps.println(Utils.hexDump(dx));
+					transmit(relay_target, TG_SET_DATA, dx, new byte[2]);
 				}
 			} else {
 				/* make initiator the same device as in replay case above */
@@ -377,7 +402,7 @@ public class Relay extends Thread {
 			if ((instr == TG_SET_DATA || instr == TG_GET_DATA
 					|| instr == IN_DATA_EXCHANGE || instr == IN_RELEASE)
 					&& ra[2] != (byte) 0x00) {
-				throw new Exception("communication error ("
+				throw new Exception("communication error (0x"
 						+ Utils.byteToString(ra[2]) + ")");
 			}
 			/* strip of the response command codes and the status field */
@@ -401,7 +426,7 @@ public class Relay extends Thread {
 		public void run() {
 			try {
 				if (!replay) {
-					if (trace.size() > 0) {
+					if (trace.sizeItoT() > 0) {
 
 						System.out.println("Saving trace to file...");
 						File f = new File("trace.obj");
@@ -425,7 +450,14 @@ public class Relay extends Thread {
 		trace = t;
 	}
 
-	public void setReplay() {
+	public void setReplayInitiator() {
 		replay = true;
+		replayInitiator = true;
 	}
+
+	public void setReplayTarget() {
+		replay = true;
+		replayInitiator = false;
+	}
+
 }

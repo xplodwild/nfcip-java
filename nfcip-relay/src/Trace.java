@@ -70,7 +70,11 @@ public class Trace implements Serializable {
 		return output;
 	}
 
-	public int size() {
+	public int sizeItoT() {
 		return traceInitToTarg.size();
+	}
+	
+	public int sizeTtoI() {
+		return traceTargToInit.size();
 	}
 }
