@@ -28,14 +28,19 @@ public class RelayMain {
 		Runtime.getRuntime().addShutdownHook(r.new Cleanup());
 
 		if (args.length > 0
-				&& (args[0].equals("-replay") || args[0].equals("-dump"))) {
+				&& (args[0].equals("-replay-initiator")
+						|| args[0].equals("-replay-target") || args[0]
+						.equals("-dump"))) {
 			try {
 				FileInputStream fis = new FileInputStream(new File("trace.obj"));
 				ObjectInputStream ois = new ObjectInputStream(fis);
 				Trace tr = (Trace) ois.readObject();
-				if (args[0].equals("-replay")) {
+				if (args[0].equals("-replay-initiator")) {
 					r.setTrace(tr);
-					r.setReplay();
+					r.setReplayInitiator();
+				} else if (args[0].equals("-replay-target")) {
+					r.setTrace(tr);
+					r.setReplayTarget();
 				} else {
 					System.out.println(tr);
 					System.exit(0);
