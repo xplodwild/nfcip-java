@@ -98,19 +98,6 @@ public class Relay extends Thread {
 					 * so we can use it here again!
 					 */
 					byte[] dx = trace.getItoT(ti);
-//					if (ti == 8) {
-//						/*
-//						 * replace mac of phone with mac of PC and see if it
-//						 * works @ position 36
-//						 */
-//						/* 00:1E:37:BA:7C:8C */
-//						dx[36] = (byte) 0x00;
-//						dx[37] = (byte) 0x1e;
-//						dx[38] = (byte) 0x37;
-//						dx[39] = (byte) 0xba;
-//						dx[40] = (byte) 0x7c;
-//						dx[41] = (byte) 0x8c;
-//					}
 					ps.println(Utils.byteArrayToString(dx));
 					transmit(relay_initiator, IN_DATA_EXCHANGE, dx, new byte[2]);
 					ti++;
@@ -135,22 +122,7 @@ public class Relay extends Thread {
 					 * instead!
 					 */
 					byte[] dx = trace.getTtoI(ti);
-
-//					if (ti == 9) {
-//						/*
-//						 * replace mac of phone with mac of PC and see if it
-//						 * works @ position 36
-//						 */
-//						/* 00:1E:37:BA:7C:8C */
-//						dx[36] = (byte) 0x00;
-//						dx[37] = (byte) 0x1e;
-//						dx[38] = (byte) 0x37;
-//						dx[39] = (byte) 0xba;
-//						dx[40] = (byte) 0x7c;
-//						dx[41] = (byte) 0x8c;
-//					}
 					ps.println(Utils.byteArrayToString(dx));
-					// ps.println(Utils.hexDump(dx));
 					transmit(relay_target, TG_SET_DATA, dx, new byte[2]);
 					ti++;
 				}
@@ -389,16 +361,11 @@ public class Relay extends Thread {
 		cmd = Utils.appendToByteArray(cmd, payload);
 
 		try {
-			// ps.println("Sent     (" + cmd.length + " bytes): "
-			// + Utils.byteArrayToString(cmd));
 
 			CommandAPDU c = new CommandAPDU(cmd);
 			ResponseAPDU r = ch.transmit(c);
 
 			byte[] ra = r.getBytes();
-
-			// ps.println("Received (" + ra.length + " bytes): "
-			// + Utils.byteArrayToString(ra));
 
 			/* check whether APDU command was accepted by the ACS ACR122 */
 			if (r.getSW1() == 0x63 && r.getSW2() == 0x27) {
@@ -419,7 +386,7 @@ public class Relay extends Thread {
 			 */
 			if ((instr == TG_SET_DATA || instr == TG_GET_DATA
 					|| instr == IN_DATA_EXCHANGE || instr == IN_RELEASE)
-					&& ra[2] != (byte) 0x00) {
+					&& ra[2] != (byte) 0x00 && ra[2] != 0x40) {
 				throw new Exception("communication error (0x"
 						+ Utils.byteToString(ra[2]) + ")");
 			}
@@ -445,7 +412,6 @@ public class Relay extends Thread {
 			try {
 				if (!replay) {
 					if (trace.sizeItoT() > 0) {
-
 						System.out.println("Saving trace to file...");
 						File f = new File("trace.obj");
 						FileOutputStream fos = new FileOutputStream(f);
