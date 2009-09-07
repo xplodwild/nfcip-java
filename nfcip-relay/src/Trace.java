@@ -61,11 +61,12 @@ public class Trace implements Serializable {
 		 * we only show raw data, we don't care about initiator/target
 		 * initialization stuff
 		 */
-		for (int i = 2; i < traceInitToTarg.size(); i++) {
-			output += ("[" + i + "] I->T: "
-					+ Utils.byteArrayToString(traceInitToTarg.get(i)) + "\n");
-			output += ("[" + i + "] T->I: "
-					+ Utils.byteArrayToString(traceTargToInit.get(i)) + "\n");
+		for (int i = 2; i < Utils.min(traceInitToTarg.size(), traceTargToInit
+				.size()); i++) {
+			output += ("[" + i + " ] I->T: "
+					+ Utils.hexDump(traceInitToTarg.get(i)) + "\n");
+			output += ("[" + i + "'] T->I: "
+					+ Utils.hexDump(traceTargToInit.get(i)) + "\n");
 		}
 		return output;
 	}
@@ -73,7 +74,7 @@ public class Trace implements Serializable {
 	public int sizeItoT() {
 		return traceInitToTarg.size();
 	}
-	
+
 	public int sizeTtoI() {
 		return traceTargToInit.size();
 	}

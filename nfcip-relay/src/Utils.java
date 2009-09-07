@@ -489,4 +489,11 @@ public class Utils {
 	public static byte[] subByteArray(byte[] array, int offset, int length) {
 		return appendToByteArray(null, array, offset, length);
 	}
+
+	public static int min(int size, int size2) {
+		if (size <= size2)
+			return size;
+		else
+			return size2;
+	}
 }
