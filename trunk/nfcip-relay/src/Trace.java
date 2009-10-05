@@ -63,10 +63,10 @@ public class Trace implements Serializable {
 		 */
 		for (int i = 2; i < Utils.min(traceInitToTarg.size(), traceTargToInit
 				.size()); i++) {
-			output += ("[" + i + " ] I->T: "
-					+ Utils.hexDump(traceInitToTarg.get(i)) + "\n");
-			output += ("[" + i + "'] T->I: "
-					+ Utils.hexDump(traceTargToInit.get(i)) + "\n");
+			output += ("[" + i + " ] I->T:\n"
+					+ Utils.hexDump(traceInitToTarg.get(i)));
+			output += ("[" + i + "'] T->I:\n"
+					+ Utils.hexDump(traceTargToInit.get(i)));
 		}
 		return output;
 	}

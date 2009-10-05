@@ -19,38 +19,51 @@
  */
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 
 public class RelayMain {
 	public static void main(String[] args) {
-		Relay r = new Relay();
-		Runtime.getRuntime().addShutdownHook(r.new Cleanup());
-
-		if (args.length > 0
-				&& (args[0].equals("-replay-initiator")
-						|| args[0].equals("-replay-target") || args[0]
-						.equals("-dump"))) {
+		if (args.length < 2) {
+			System.out.println("NFCIP Relay Tool");
+			System.out.println("----------------");
+			System.out
+					.println("  -c [file]    Create a dump (requires two NFC readers)");
+			System.out
+					.println("  -i [file]    Replays the initiator from dump file (created with -c)");
+			System.out
+					.println("  -t [file]    Replays the target from dump file (created with -c)");
+			System.out
+					.println("  -d [file]    Shows the dump (created with -c)\n");
+		} else {
 			try {
-				FileInputStream fis = new FileInputStream(new File("trace.obj"));
+				Relay r = new Relay();
+				FileInputStream fis = new FileInputStream(new File(args[1]));
 				ObjectInputStream ois = new ObjectInputStream(fis);
 				Trace tr = (Trace) ois.readObject();
-				if (args[0].equals("-replay-initiator")) {
+				if (args[0].equals("-i")) {
 					r.setTrace(tr);
 					r.setReplayInitiator();
-				} else if (args[0].equals("-replay-target")) {
+				} else if (args[0].equals("-t")) {
 					r.setTrace(tr);
 					r.setReplayTarget();
-				} else {
+				} else if (args[0].equals("-d")) {
 					System.out.println(tr);
 					System.exit(0);
+				} else {
+					// we run in relay mode...
 				}
+				Runtime.getRuntime().addShutdownHook(r.new Cleanup());
+				r.run();				
+			} catch (FileNotFoundException e) {
+				System.out.println("Trace file \"" + args[1]
+						+ "\" does not exist!");
 			} catch (IOException e) {
 				System.out.println("Error reading trace!");
 			} catch (ClassNotFoundException e) {
 				System.out.println("Error loading trace!");
 			}
 		}
-		r.run();
 	}
 }
